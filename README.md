@@ -16,7 +16,7 @@
   <strong>OpenHarness</strong> is a resilient, long-lived autonomous AI agent daemon built in Go. It unifies persistent memory, sandboxed multi-runtime execution, human-in-the-loop collaboration, background daemons, scheduled tasks, and peer-to-peer agent mesh networking into a single self-evolving platform.
 </p>
 
-[Quickstart](#quickstart) • [Key Features](#key-features) • [Architecture](#architecture) • [Tools & Capabilities](#tools--capabilities) • [Admin Dashboard](#admin-dashboard) • [Deployment](#deployment)
+[Quickstart](#quickstart) • [Key Features](#key-features) • [Architecture](#architecture) • [Tools & Capabilities](#tools--capabilities) • [Deployment](#deployment)
 
 </div>
 
@@ -30,8 +30,6 @@
 - 🔍 **Hybrid Dual Search** — Combines in-memory **BM25 lexical search** with **paragraph-aligned semantic vector embeddings** (`FVEC v1`) with adaptive batching.
 - 🧩 **Agent Skills & MCP Support** — Native support for the [Agent Skills standard](https://agentskills.io) with automated security audit subagents, plus [Model Context Protocol (MCP)](https://modelcontextprotocol.io) client integration (Stdio, SSE, Streamable, and OAuth).
 - 🤖 **Subagents & Multi-Agent Mesh** — Delegate complex work synchronously or asynchronously to child subagents, and connect multiple OpenHarness instances over a peer-to-peer messaging mesh.
-- 🖥️ **Live Terminal Admin UI** — Built-in Matrix-styled dashboard (HTMX + DaisyUI) featuring real-time inspector metrics, live tool-call feeds, in-place config editor, and live log tailing.
-- 🔄 **Atomic Self-Updating** — Background GitHub release tracking, SHA256 checksum verification, zero-downtime atomic binary swapping, and automatic rollback.
 
 ---
 
@@ -57,11 +55,6 @@ flowchart TB
         Scheduler["Task Scheduler\n& Cron Engine"]
     end
 
-    subgraph AdminUI["Embedded Web Engine"]
-        AdminServer["Admin Dashboard (HTMX + DaisyUI)\nLive Inspector • Tool Feed • Config Editor"]
-        Publisher["HTML Canvas & App Publisher\nInteractive Web Artifacts"]
-    end
-
     LLM <--> AgentLoop
     Operator --> Inbox
     Mesh --> Inbox
@@ -71,7 +64,6 @@ flowchart TB
     AgentLoop <--> ToolCatalog
     AgentLoop <--> Disk
     AgentLoop <--> Scheduler
-    AgentLoop -.-> AdminServer
 ```
 
 ---
@@ -125,10 +117,6 @@ model = "gpt-4o"
 memory_dir = "./data/memory"
 state_file = "./data/state.json"
 max_context_tokens = 32000
-
-[admin]
-enabled = true
-listen = "127.0.0.1:8080"
 
 [sandbox]
 enabled = true
@@ -193,23 +181,7 @@ OpenHarness uses a **Dynamic 2-Tier Tool Architecture**: Core Tier 1 tools are l
 | **MCP Integration** | `mcp_discover_tools`, `mcp_list_servers`, `mcp_call_tool` | Connect to Model Context Protocol servers to access thousands of external tools. |
 | **Web & Intelligence** | `web_fetch`, `wiki_fetch`, `email_fetch` | Markdown-converted web browsing, MediaWiki API integration, IMAP email fetch. |
 | **Collaboration** | `send_message`, `send_rich_message`, `send_voice_message`, `send_file` | Bidirectional Telegram & Discord messaging with voice audio and interactive UI components. |
-| **System & Life-cycle** | `context_status`, `get_time`, `sleep`, `update_check`, `update_apply` | Inspect token usage and backend performance, pause execution, and trigger self-updates. |
-
----
-
-## 🖥️ Admin Dashboard
-
-OpenHarness includes an embedded web management console designed with a sleek, phosphor Matrix terminal aesthetic.
-
-```
-http://127.0.0.1:8080/admin
-```
-
-- **Live Agent Inspector**: Real-time phase tracking, token counters, message counts, and idle metrics.
-- **Live Tool-Call Stream**: Instant ring-buffer feed of every tool invocation and result.
-- **Interactive Configuration Editor**: Modify TOML configuration with instant schema validation and safe restart.
-- **Skill Manager**: View, toggle, and manage installed Agent Skills with single-click actions.
-- **Live Log Streaming**: Colored, formatted live log viewer streaming daemon activity.
+| **System & Life-cycle** | `context_status`, `get_time`, `sleep` | Inspect token usage and backend performance, pause execution, and check system status. |
 
 ---
 
@@ -243,17 +215,6 @@ systemctl --user daemon-reload
 systemctl --user enable --now openharness.service
 journalctl --user -u openharness -f
 ```
-
----
-
-## 🔄 Self-Updating
-
-When `[update]` is enabled, OpenHarness runs a background routine that periodically queries GitHub releases.
-
-1. Detects new semantic releases.
-2. Downloads and verifies checksums against `SHA256SUMS`.
-3. Performs an **atomic binary swap** (retaining `.previous` for instant rollback).
-4. Initiates a graceful restart to seamlessly transition to the new version.
 
 ---
 
