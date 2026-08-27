@@ -32,7 +32,7 @@ jobs:
           #
           # The token must be a fine-grained PAT scoped to this repo
           # with: Contents (Read+Write), Pull requests (Read+Write).
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
@@ -45,7 +45,7 @@ jobs:
       - name: Enrich release body with auto-generated PR list
         if: ${{ steps.release.outputs.release_created }}
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
           # gh release view/edit normally derive the repo from the local
           # .git directory. The release-please job never runs
           # actions/checkout, so .git is absent and gh fails with
