@@ -313,7 +313,7 @@ func TestToolErrorStreak_NudgeAtThree(t *testing.T) {
 	}}
 	tools := &recordingTools{results: map[string]string{
 		"sandbox_write": "Error: filename is required",
-		"send_message":   "Message sent to collaborator.",
+		"send_message":  "Message sent to collaborator.",
 	}}
 	agent := newDeliveryDebtAgent(chat, tools, nil, 4)
 
