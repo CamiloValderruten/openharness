@@ -1,113 +1,234 @@
-# Faultline
+<div align="center">
 
-An autonomous AI agent daemon written in Go. Faultline runs as a persistent, long-lived process that continuously interacts with an LLM via an OpenAI-compatible API. It learns about the world by browsing the web, persists knowledge in a file-based memory system, communicates with a human collaborator via Telegram, and can execute Python scripts in a sandboxed Docker environment.
+![OpenHarness Banner](assets/openharness-banner.jpg)
 
-The agent can modify its own operating prompts, enabling self-directed behavioral evolution over time. With auto-update enabled, the daemon also keeps its own binary current — polling GitHub releases, verifying checksums, atomically swapping in new versions, and restarting cleanly. See [Auto-update](#auto-update) below.
+# OpenHarness
 
-## Requirements
+### The Autonomous, Multi-Runtime AI Daemon & Agent Execution Platform
 
-- Go 1.26+ (only needed if building from source)
-- Docker on the host machine (optional, for the sandbox / `skill_execute` features). The expected deployment is faultline running as a host process talking to the host's Docker daemon — see [Deployment](#deployment).
-- A Telegram bot token (optional; for collaborator communication)
-- An OpenAI-compatible API endpoint (local or remote)
+[![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?style=for-the-badge&logo=go)](https://golang.org)
+[![Docker](https://img.shields.io/badge/Docker-Multi--Runtime-2496ED?style=for-the-badge&logo=docker)](https://docker.com)
+[![MCP](https://img.shields.io/badge/MCP-Protocol%20Ready-black?style=for-the-badge)](https://modelcontextprotocol.io)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Architecture](https://img.shields.io/badge/Architecture-Hexagonal-blueviolet?style=for-the-badge)](#architecture)
 
-## Installation
+<p align="center">
+  <strong>OpenHarness</strong> is a resilient, long-lived autonomous AI agent daemon built in Go. It unifies persistent memory, sandboxed multi-runtime execution, human-in-the-loop collaboration, background daemons, scheduled tasks, and peer-to-peer agent mesh networking into a single self-evolving platform.
+</p>
 
-Pre-built binaries are published on every tagged release for `linux/amd64`, `linux/arm64`, and `darwin/arm64`.
+[Quickstart](#quickstart) • [Key Features](#key-features) • [Architecture](#architecture) • [Tools & Capabilities](#tools--capabilities) • [Admin Dashboard](#admin-dashboard) • [Deployment](#deployment)
 
-```sh
-# Pick the right tarball for your platform from the latest release at
-# https://github.com/CamiloValderruten/faultline/releases/latest
-curl -L -O https://github.com/CamiloValderruten/faultline/releases/latest/download/faultline_<version>_linux_x86_64.tar.gz
+</div>
+
+---
+
+## ⚡ Highlights
+
+- 🧠 **Autonomous & Self-Evolving** — Runs continuously as a background daemon. Self-modifies its own operational prompts and preserves memory across context compaction.
+- 📬 **5-Tier Priority Inbox** — Real-time event routing prioritizing critical daemon alerts, Discord/Telegram messages, subagent reports, scheduled triggers, peer messages, and webhooks.
+- 📦 **Sandboxed Multi-Runtime Engine** — Ephemeral, secure Docker sandbox pre-loaded with **Python (`uv`), Node.js, Bun, Deno, Go, Git, and GitHub CLI (`gh`)**.
+- 🔍 **Hybrid Dual Search** — Combines in-memory **BM25 lexical search** with **paragraph-aligned semantic vector embeddings** (`FVEC v1`) with adaptive batching.
+- 🧩 **Agent Skills & MCP Support** — Native support for the [Agent Skills standard](https://agentskills.io) with automated security audit subagents, plus [Model Context Protocol (MCP)](https://modelcontextprotocol.io) client integration (Stdio, SSE, Streamable, and OAuth).
+- 🤖 **Subagents & Multi-Agent Mesh** — Delegate complex work synchronously or asynchronously to child subagents, and connect multiple OpenHarness instances over a peer-to-peer messaging mesh.
+- 🖥️ **Live Terminal Admin UI** — Built-in Matrix-styled dashboard (HTMX + DaisyUI) featuring real-time inspector metrics, live tool-call feeds, in-place config editor, and live log tailing.
+- 🔄 **Atomic Self-Updating** — Background GitHub release tracking, SHA256 checksum verification, zero-downtime atomic binary swapping, and automatic rollback.
+
+---
+
+## 🏗️ Architecture
+
+OpenHarness is engineered around **Hexagonal Architecture (Ports & Adapters)**. The core domain agent loop is fully decoupled from external infrastructure, LLM providers, and storage backends.
+
+```mermaid
+flowchart TB
+    subgraph External["External World & Interfaces"]
+        LLM["LLM APIs\n(OpenAI / KoboldCpp / Local)"]
+        Operator["Collaborators\n(Discord / Telegram / Voice)"]
+        Mesh["Peer Agents &\nAuthenticated Webhooks"]
+        Disk["Filesystem Storage\n(Memory / Vector FVEC / State)"]
+        DockerHost["Host Docker Engine\n(Sandboxes / Skills / Daemons)"]
+        MCPWorld["MCP Servers\n(Stdio / SSE / OAuth)"]
+    end
+
+    subgraph Core["OpenHarness Core Daemon"]
+        Inbox["5-Tier Priority Inbox\n(P0 Alerts → P1 Messages → P2 Cron/Subagents → P3 Peers → P4 Webhooks)"]
+        AgentLoop["Domain Agent Loop\n(Context Compaction • Prompt Evolution • Dynamic Tooling)"]
+        ToolCatalog["2-Tier Tool Catalog\n(Tier 1 Core + Tier 2 Semantic Tool Search)"]
+        Scheduler["Task Scheduler\n& Cron Engine"]
+    end
+
+    subgraph AdminUI["Embedded Web Engine"]
+        AdminServer["Admin Dashboard (HTMX + DaisyUI)\nLive Inspector • Tool Feed • Config Editor"]
+        Publisher["HTML Canvas & App Publisher\nInteractive Web Artifacts"]
+    end
+
+    LLM <--> AgentLoop
+    Operator --> Inbox
+    Mesh --> Inbox
+    DockerHost <--> Core
+    MCPWorld <--> ToolCatalog
+    Inbox --> AgentLoop
+    AgentLoop <--> ToolCatalog
+    AgentLoop <--> Disk
+    AgentLoop <--> Scheduler
+    AgentLoop -.-> AdminServer
+```
+
+---
+
+## 🚀 Quickstart
+
+### 1. Download Pre-Built Binary
+
+Pre-compiled release binaries are available for Linux (`amd64`, `arm64`) and macOS (`arm64`).
+
+```bash
+# Download latest release
+curl -L -O https://github.com/CamiloValderruten/faultline/releases/latest/download/faultline_linux_x86_64.tar.gz
 curl -L -O https://github.com/CamiloValderruten/faultline/releases/latest/download/SHA256SUMS
 
-# Verify
+# Verify integrity
 sha256sum -c SHA256SUMS --ignore-missing
 
-# Extract and install
-tar xzf faultline_<version>_linux_x86_64.tar.gz
-sudo install faultline /usr/local/bin/        # or wherever you prefer
+# Extract & Install
+tar xzf faultline_linux_x86_64.tar.gz
+sudo install faultline /usr/local/bin/openharness
 ```
 
-The release tarball also contains `LICENSE`, `README.md`, `AGENTS.md`, and `config.example.toml`.
+### 2. Build from Source
 
-Once installed, enable [Auto-update](#auto-update) and the daemon will pick up new releases automatically — no need to repeat this manual install for every version.
+Requires **Go 1.26+**:
 
-## Building from source
-
-```sh
-go build -o faultline ./cmd/faultline
+```bash
+git clone https://github.com/CamiloValderruten/faultline.git openharness
+cd openharness
+go build -o openharness ./cmd/faultline
 ```
 
-For a build with version metadata baked in (matching what release builds embed):
+### 3. Initialize Configuration
 
-```sh
-go build \
-  -ldflags="-X github.com/CamiloValderruten/faultline/internal/version.Version=$(git describe --tags --always) \
-            -X github.com/CamiloValderruten/faultline/internal/version.Commit=$(git rev-parse --short HEAD) \
-            -X github.com/CamiloValderruten/faultline/internal/version.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-  -o faultline ./cmd/faultline
+Copy the heavily annotated template and set your credentials:
+
+```bash
+cp config.example.toml config.toml
 ```
 
-The binary embeds the default prompt templates from `internal/prompts/templates/` at compile time.
+Minimal `config.toml` structure:
 
-Check what version a binary reports:
+```toml
+[api]
+url = "https://api.openai.com/v1"
+api_key = "your-api-key"
+model = "gpt-4o"
 
-```sh
-./faultline -version
+[agent]
+memory_dir = "./data/memory"
+state_file = "./data/state.json"
+max_context_tokens = 32000
+
+[admin]
+enabled = true
+listen = "127.0.0.1:8080"
+
+[sandbox]
+enabled = true
+image = "ghcr.io/camilovalderruten/faultline-sandbox:latest"
 ```
 
-## Configuration
+### 4. Run OpenHarness
 
-Faultline reads a TOML config file (default: `./config.toml`). Missing fields fall back to sensible defaults.
-
-The repository includes [`config.example.toml`](config.example.toml) — a heavily-commented copy of every section with inline documentation for each field. Copy it to your deployment as `config.toml` and edit. The same defaults are returned by `config.Default()` in code.
-
-Key sections:
-
-- `[api]` — LLM endpoint URL, key, model, KoboldCpp auto-detection.
-- `[agent]` — memory directory, context limits, sampler parameters, state persistence, sleep cap.
-- `[telegram]` — optional collaborator messaging.
-- `[log]` — console level + log directory.
-- `[sandbox]` — optional Python execution via Docker.
-- `[email]` — optional IMAP email reading.
-- `[limits]` — content-size caps for memory excerpts, search results, sandbox output.
-
-## Running
-
-```sh
-./faultline -config ./config.toml
+```bash
+./openharness -config ./config.toml
 ```
 
-The agent runs continuously until interrupted. Shutdown behavior:
+> [!NOTE]
+> OpenHarness runs under an unprivileged user to ensure sandbox security. It strictly refuses to run as root (`uid=0`).
 
-- **First SIGINT/SIGTERM**: triggers graceful shutdown. The agent gets up to 10 turns (2-minute timeout) to save state to memory.
-- **Second SIGINT/SIGTERM**: forces immediate exit.
+---
 
-Under a process supervisor (systemd, Docker, Kubernetes), the first signal is sufficient for clean rolling restarts.
+## 💎 Key Features
 
-Faultline refuses to start as root (`uid=0`). The agent has broad filesystem and network access, and the sandbox security model depends on `--user <unprivileged>:<unprivileged>` propagating an unprivileged host UID into containers — running as root collapses both protections. Run under a dedicated unprivileged user (e.g. `User=faultline` in a systemd unit, or `sudo -u faultline` for ad-hoc).
+### 🧠 Persistent Memory & Semantic Hybrid Search
+- **Markdown-first Storage**: Long-term memories stored in human-readable Markdown files with full directory support and safe `.trash/` soft deletion.
+- **Dual BM25 + Vector Retrieval**: Combines BM25 keyword matching with paragraph-level semantic embeddings.
+- **Adaptive Batching**: Embedded via OpenAI-compatible endpoints with auto-adjusting batch sizes to gracefully recover from network or token-limit spikes.
 
-## Deployment
+### 🛡️ Multi-Runtime Sandbox & Background Daemons
+- **Multi-language Tooling**: Executes Python (`uv`), Node.js, Bun, Deno, and Go in ephemeral containers.
+- **Container Daemons**: The agent can launch long-running background service containers (`daemon_spawn`) that run watchers, servers, or scrapers and send high-priority alerts back to the agent.
+- **Security Hardened**: Non-root execution (`--user <uid>:<gid>`), no new privileges, ephemeral lifecycle, isolated memory limits.
 
-The expected deployment is **faultline as a host process** on a machine with Docker installed. Faultline talks to the host's Docker daemon to spawn ephemeral sandbox containers per `sandbox_*` and `skill_execute` call. This is the path that's been tested and is what the maintainer runs in production.
+### 🧩 Agent Skills & Automated AI Security Audit
+- Compatible with [Agent Skills](https://agentskills.io) standard (`SKILL.md` specifications).
+- **Autonomous Skill Installer** (`skill_install`) downloads skills from Git or URLs.
+- **Subagent Security Auditing**: Before any installed skill is loaded, an isolated audit subagent inspects the code for exfiltration patterns, credential theft, and malicious indicators.
 
-### Native, under systemd (recommended)
+### 🌐 Model Context Protocol (MCP) Integration
+- Connects directly to external MCP servers (Stdio, SSE, Streamable).
+- Auto-discovers external tools dynamically and supports OAuth authentication workflows.
 
-A minimal user-level systemd unit:
+### 💬 Multichannel Collaboration & Voice
+- **Discord & Telegram Bots**: Rich messaging with Markdown formatting, interactive action buttons, and file attachments.
+- **Speech Synthesis (TTS)**: Send natural voice messages with custom audio waveform data.
+- **HTML Canvas Publisher**: Publishes interactive visual dashboards, live HTML artifacts, and charts accessible via local browser.
+
+### 🤝 Multi-Agent Delegation & Peer Mesh
+- **Hierarchical Subagents**: Spawn child agents synchronously or asynchronously with custom profiles and model parameters.
+- **Peer-to-Peer Agent Mesh**: Multiple OpenHarness agents communicate across networks via direct peer messaging (`peer_send`, `peer_inbox`).
+
+---
+
+## 🛠️ Tools & Capabilities
+
+OpenHarness uses a **Dynamic 2-Tier Tool Architecture**: Core Tier 1 tools are loaded by default, while specialized Tier 2 tools are discovered and unlocked on-the-fly via semantic tool search (`search_available_tools`).
+
+| Domain | Key Tools | Description |
+|---|---|---|
+| **Memory & Storage** | `memory_read`, `memory_write`, `memory_edit`, `memory_search`, `memory_grep`, `memory_restore` | Persistent markdown notes, soft-delete trash, dual lexical + vector semantic search. |
+| **Sandbox & Code** | `sandbox_execute`, `sandbox_shell`, `sandbox_write`, `sandbox_read`, `sandbox_install_package` | Execute Python (`uv`), Node, Bun, Deno, Go, or shell scripts in isolated Docker containers. |
+| **Daemons & Background** | `daemon_spawn`, `daemon_list`, `daemon_fetch`, `daemon_stop` | Manage persistent background worker containers with automated alert feeds. |
+| **Scheduler & Cron** | `schedule_task`, `list_scheduled_tasks`, `cancel_scheduled_task` | Schedule one-off delays or recurring cron actions that wake the agent loop. |
+| **Skills Ecosystem** | `skill_activate`, `skill_read`, `skill_execute`, `skill_install`, `skill_work_read` | Load Agent Skills, execute isolated skill scripts, and autonomously install audited skills. |
+| **Subagents & Mesh** | `subagent_run`, `subagent_spawn`, `subagent_wait`, `peer_send`, `peer_inbox` | Delegate sub-tasks to child agents and communicate across peer agent networks. |
+| **MCP Integration** | `mcp_discover_tools`, `mcp_list_servers`, `mcp_call_tool` | Connect to Model Context Protocol servers to access thousands of external tools. |
+| **Web & Intelligence** | `web_fetch`, `wiki_fetch`, `email_fetch` | Markdown-converted web browsing, MediaWiki API integration, IMAP email fetch. |
+| **Collaboration** | `send_message`, `send_rich_message`, `send_voice_message`, `send_file` | Bidirectional Telegram & Discord messaging with voice audio and interactive UI components. |
+| **System & Life-cycle** | `context_status`, `get_time`, `sleep`, `update_check`, `update_apply` | Inspect token usage and backend performance, pause execution, and trigger self-updates. |
+
+---
+
+## 🖥️ Admin Dashboard
+
+OpenHarness includes an embedded web management console designed with a sleek, phosphor Matrix terminal aesthetic.
+
+```
+http://127.0.0.1:8080/admin
+```
+
+- **Live Agent Inspector**: Real-time phase tracking, token counters, message counts, and idle metrics.
+- **Live Tool-Call Stream**: Instant ring-buffer feed of every tool invocation and result.
+- **Interactive Configuration Editor**: Modify TOML configuration with instant schema validation and safe restart.
+- **Skill Manager**: View, toggle, and manage installed Agent Skills with single-click actions.
+- **Live Log Streaming**: Colored, formatted live log viewer streaming daemon activity.
+
+---
+
+## 📦 Deployment
+
+### Production systemd Unit (Recommended)
+
+Run OpenHarness natively on the host to enable direct control over Docker sandboxes without socket-mount security risks.
 
 ```ini
-# ~/.config/systemd/user/faultline.service
+# ~/.config/systemd/user/openharness.service
 [Unit]
-Description=Faultline
+Description=OpenHarness Autonomous AI Daemon
 After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/data/faultline
-# Optional: wait for the LLM backend to come up before starting.
-ExecStartPre=/bin/bash -c 'until curl -sf http://localhost:5001/v1/models >/dev/null 2>&1; do sleep 5; done'
-ExecStart=/data/faultline/bin/faultline
+WorkingDirectory=/data/openharness
+ExecStart=/data/openharness/bin/openharness -config /data/openharness/config.toml
 Restart=always
 RestartSec=5
 
@@ -115,184 +236,43 @@ RestartSec=5
 WantedBy=default.target
 ```
 
-Layout under `/data/faultline`:
-
-```
-/data/faultline/
-├── bin/faultline           # the binary; auto-update writes here
-├── config.toml
-├── memory/                 # the agent's mutable memory store
-├── sandbox/                # per-sandbox scratch + cache
-├── skills/                 # operator-supplied (or skill_install-ed) skills
-├── logs/                   # daily-rotated agent logs and chat transcripts
-└── state.json              # conversation log, restored on restart
-```
-
 Enable and start:
 
-```sh
+```bash
 systemctl --user daemon-reload
-systemctl --user enable --now faultline.service
-journalctl --user -u faultline -f
+systemctl --user enable --now openharness.service
+journalctl --user -u openharness -f
 ```
 
-The user that owns this unit (`User=` for system units, the invoking user for user units) needs:
+---
 
-- Membership in the `docker` group (or equivalent) so it can talk to the daemon.
-- Read access to the LLM endpoint (network, API key in `config.toml`).
-- Write access to `/data/faultline` and everything under it.
-- **Not** to be `root` — faultline refuses to start at `uid=0`.
+## 🔄 Self-Updating
 
-A system-level unit (`/etc/systemd/system/faultline.service`) with `User=faultline` works the same way; pick whichever matches how you run other daemons.
+When `[update]` is enabled, OpenHarness runs a background routine that periodically queries GitHub releases.
 
-### Faultline in a container (untested; significant security trade-off)
+1. Detects new semantic releases.
+2. Downloads and verifies checksums against `SHA256SUMS`.
+3. Performs an **atomic binary swap** (retaining `.previous` for instant rollback).
+4. Initiates a graceful restart to seamlessly transition to the new version.
 
-It is technically possible to run faultline itself inside a Docker container, mounting the host's Docker socket so the in-container agent can spawn sandbox containers on the host. **This has not been tested by the maintainer.** It is documented here for completeness, with the trade-off called out:
+---
 
-- Mounting `/var/run/docker.sock` into a container is functionally equivalent to giving that container root on the host. Anyone with access to the socket can `docker run -v /:/host …` and escape immediately.
-- Faultline's `os.Getuid()==0` refusal does NOT protect against this. The check looks at the agent process's UID; it doesn't see that the process can talk to a privileged daemon.
-- A successful prompt injection or a malicious skill that bypasses the audit subagent can therefore compromise the host even though the in-container agent runs unprivileged.
+## 🤝 Contributing
 
-If you accept this trade-off — for the operational benefits of containerization (supervisor restart, log capture, resource limits) — the rough shape is:
+We welcome community contributions! Please adhere to [Conventional Commits](https://www.conventionalcommits.org/):
 
-```yaml
-# docker-compose.yml — UNTESTED. Validate before relying on.
-services:
-  faultline:
-    image: ghcr.io/<your-fork-or-mirror>/faultline:<version>
-    user: "1000:1000"
-    restart: unless-stopped
-    volumes:
-      - /data/faultline:/data/faultline
-      - /var/run/docker.sock:/var/run/docker.sock
-    working_dir: /data/faultline
-    command: ["./bin/faultline", "-config", "./config.toml"]
-    # Whatever network and DNS your LLM endpoint needs:
-    network_mode: host
+- `feat:` — New capabilities or features
+- `fix:` — Bug fixes
+- `docs:` — Documentation improvements
+- `refactor:` — Code structure refactoring
+
+```bash
+# Run test suite
+go test ./...
 ```
 
-Alternative without the socket-mount risk: **don't run faultline in a container.** The native systemd path above gets you supervisor restart, log capture, and resource limits via `MemoryMax=` / `CPUQuota=` etc. without the `docker.sock` blast radius.
+---
 
-Note that there is no published `ghcr.io/camilovalderruten/faultline` image; the published image is the **sandbox** image (`ghcr.io/camilovalderruten/faultline-sandbox`) used by the agent's sandbox feature. If you containerize faultline itself, you build that image yourself.
+## 📄 License
 
-## Auto-update
-
-When `[update]` is enabled in `config.toml`, a background goroutine polls GitHub releases on a configured interval. If a newer version is available, the updater downloads the matching release tarball, verifies it against the published `SHA256SUMS`, atomically swaps the binary in place (keeping the old binary as `<binary>.previous` for one-deep rollback), and triggers graceful shutdown so the new binary takes over. Disabled by default; opt in with `enabled = true`.
-
-The LLM does not decide whether to update. The agent has `update_check`, `update_apply`, and `get_version` tools that kick off the same code path, so the operator can say "update yourself" via Telegram, but the actual decision logic is in code.
-
-Three restart modes — pick whichever matches how your deployment runs:
-
-| `restart_mode` | What happens after the swap | Use when |
-|----------------|------------------------------|----------|
-| `exit` *(default)* | Save state and `os.Exit(0)`. Supervisor respawns the unit. | systemd, Docker, Kubernetes, runit, supervisord — anything with `Restart=always`. |
-| `self-exec` | Save state and `syscall.Exec` the new binary, replacing the current process image. Same PID. | Bare-process runs without a supervisor (tmux, screen, manual `./faultline`). |
-| `command` | Save state, run a configured `restart_command` detached, exit. | Custom orchestrators. |
-
-On every successful update the agent appends an entry to `meta/version-history.md` in its memory store, so post-restart it can discover that it just updated by reading its own memory.
-
-See the `[update]` section in [`config.example.toml`](config.example.toml) for every knob.
-
-## Features
-
-### Persistent Memory
-
-The agent stores knowledge as markdown files in a configurable directory. All file paths are case-insensitive and auto-appended with `.md`. The memory system supports read, write, edit, append, insert, delete (soft, to `.trash/`), restore, move, list, grep, and full-text search.
-
-### BM25 Search
-
-An in-memory BM25 search index is built from all memory files on startup and rebuilt during context compaction. The agent uses this to find relevant memories by keyword.
-
-### Semantic Search (optional)
-
-When `[embeddings]` is configured with an OpenAI-compatible endpoint and model, Faultline embeds every memory file (excluding `prompts/` and `.trash/`) into an in-memory vector index, persisted to `<memory>/.vector/index.bin` in a custom binary format so embeddings aren't recomputed on restart.
-
-**Paragraph-aligned chunking.** Files are split on blank lines and each paragraph is embedded as its own unit (keyed `path#0`, `path#1`, ...). Single-paragraph files keep the legacy bare-`path` shape. The only safety cap is a per-paragraph byte limit (3000 bytes) that triggers a byte-cut for the rare giant paragraph (one-line file, an unbroken code block, etc.) — paragraph boundaries are otherwise honoured exactly as the operator wrote them, so search snippets are semantically clean sections rather than arbitrary chunks.
-
-**Adaptive batching.** The embedder calls the API in batches sized by `[embeddings].batch_size`. On batch failure (e.g. a server with a tighter physical batch limit, an oversized paragraph, transient errors) the batch size halves and retries; after 5 consecutive successful batches it doubles back toward the configured ceiling. A failure that persists down to batch size 1 means a single paragraph the server can't accept — that paragraph is logged and skipped, and the rest of the indexing pass continues. Skipped paragraphs don't appear in semantic search but BM25 still finds the parent file.
-
-**Dual-section search.** `memory_search` returns BOTH lexical (BM25) and semantic results in clearly labeled sections per query. Semantic results are deduped to one entry per file (best-scoring paragraph wins) and the snippet shown is the matched paragraph itself, not the whole file — so the LLM gets the relevant section directly. When embeddings are disabled, `memory_search` falls back to BM25-only output.
-
-**Defaults and cost.** Default model is `text-embedding-3-small` (1536 dim, ~$0.02/1M tokens — indexing 10k typical memory files is ~$0.10 one-time). Works with OpenAI, Ollama, LM Studio, vLLM, llama.cpp's embedding server, anything speaking the same wire shape. If you change the embedding model, the on-disk index records the prior model name and is automatically discarded and rebuilt on next startup.
-
-### Web Browsing
-
-The agent can fetch web pages, which are converted from HTML to readable markdown text. Results are cached with a TTL to avoid redundant fetches. Long pages can be paginated with offset/length parameters.
-
-A separate `wiki_fetch` tool pulls plain-text article extracts directly from the MediaWiki API for cheap Wikipedia reads — no HTML parsing, much smaller token footprint than `web_fetch` for the same article.
-
-### Context Compaction
-
-When the conversation grows beyond a configurable token threshold, the agent is asked to save its current state to memory and produce a summary. The context is then rebuilt from the system prompt, recent memories, and the summary, allowing indefinite operation.
-
-### KoboldCpp Extras (optional)
-
-When the configured API endpoint is detected to be [KoboldCpp](https://github.com/LostRuins/koboldcpp), Faultline uses three native endpoints that sit alongside the OpenAI compatibility layer:
-
-- **Real tokenization** via `/api/extra/tokencount` for compaction decisions, instead of the 4-chars-per-token heuristic. The heuristic under-counts code/JSON heavily, so without this the agent can be running 30-40% over its self-reported token usage by the time compaction triggers.
-- **Generation aborts** via `/api/extra/abort` on forced shutdown, so the model actually stops generating instead of leaving the GPU/CPU pinned until the backend notices the client is gone.
-- **Backend perf metrics** via `/api/extra/perf` surfaced in the `context_status` tool: last call's input/output tokens, eval speed, total generations, queue depth, uptime.
-
-Detection is best-effort and bounded by a 5s timeout at startup. If the backend isn't KoboldCpp (real OpenAI, vLLM, llama.cpp's openai endpoint, etc.) detection fails silently and Faultline falls back to the heuristic with no other behavioural changes. Set `kobold_extras = false` in `[api]` to skip detection entirely.
-
-### Self-Modifying Prompts
-
-The agent's operating prompts (`system.md`, `compaction.md`, `cycle-start.md`, `continue.md`, `shutdown.md`) are mutable files in the memory store. The agent can read and rewrite them, changing its own behavior across context compactions.
-
-The default contents of these prompts live in `internal/prompts/templates/*.md` in the source tree and are embedded into the binary at build time via `//go:embed`. At runtime they are seeded into `<memory_dir>/prompts/*.md` on first startup. After that, the running agent reads from the memory store, not the embedded copies. This means:
-
-- Editing files under `internal/prompts/templates/` in the source tree only affects fresh installs (or installs whose memory store has had those files deleted). To rebuild from defaults, delete `<memory_dir>/prompts/` and restart.
-- Edits the agent makes to its own prompts persist in the memory store and survive restarts.
-- Edits to the embedded defaults require rebuilding the binary.
-
-### Telegram Integration
-
-Bidirectional communication with a human collaborator via Telegram or Discord. Incoming events never cancel an in-flight LLM request. They enter a priority inbox (daemon alerts first, then collaborator messages, then subagent/cron, peers, and webhook). By default (`wait_for_tools = false`), P1 collaborator messages that arrive during generation may defer pending tool calls. With `wait_for_tools = true`, P1 stays queued until tools finish; P0 daemon alerts still interrupt after Chat. Outgoing Telegram messages are converted to MarkdownV2 with auto-chunking for the 4096-character limit, falling back to plain text on conversion failure.
-
-### Multi-runtime Sandbox
-
-An optional Docker-based execution environment. The default image (`ghcr.io/camilovalderruten/faultline-sandbox`, built from `docker/sandbox/Dockerfile`) is Debian-based and ships Python+pip, [`uv`](https://github.com/astral-sh/uv) + `uvx`, Node.js + npm + npx, [Bun](https://bun.sh), [Deno](https://deno.com), Go, plus common CLI tools (curl, jq, ripgrep, fd, git, [`gh`](https://cli.github.com/), ...). `sandbox_execute` runs Python scripts via `uv`; `sandbox_shell` gives the agent arbitrary shell access to any runtime on PATH. Containers are ephemeral (created per execution, removed after); the sandbox has a flat file structure (`scripts/`, `input/`, `output/`) and supports configurable network access, memory limits, execution timeouts, and `[sandbox.env]` injection (e.g. `GH_TOKEN` for authenticated `gh` / git). Configure a different image in `config.toml` if you need something else.
-
-### IMAP Email (optional)
-
-When `[email]` is configured, the agent gets an `email_fetch` tool that opens a short-lived IMAP connection per call. Useful for letting the agent pick up things its operator emails to a dedicated inbox.
-
-### Agent Skills (optional)
-
-Faultline supports the [Agent Skills](https://agentskills.io) open standard. When `[skills]` is enabled, Faultline scans `<dir>/<skill-name>/SKILL.md` files at startup and on every context rebuild, injects each skill's name + description into the system prompt's "Available Skills" section, and advertises four `skill_*` tools (activate, read, execute, work_read). Skills are operator-supplied folders that bundle specialized instructions plus optional `scripts/`, `references/`, and `assets/` subdirectories. Each `skill_execute` call runs in an isolated Docker container with **only** the named skill's directory mounted at `/skill` (read-only) plus a fresh per-call `/work` scratch directory — skills cannot see the agent's memory, the regular sandbox, or any other skill's data. The sandbox feature must be enabled separately for `skill_execute` to function.
-
-When `[skills] install_enabled = true` (off by default), the agent can also install new skills autonomously via `skill_install`, which fetches a tarball URL or git repository into the skills directory after validating that it contains a parseable `SKILL.md`. The catalog reloads on every context rebuild plus immediately after a successful install, so a freshly-installed skill is visible without a restart.
-
-When `[subagent]` is also enabled, every `skill_install` triggers a security audit before the skill reaches the catalog: an audit subagent (running under the `default` profile) is given the extracted skill's metadata and full file contents, instructed to look for behavior-vs-intent mismatches, exfiltration patterns, credential theft, code execution, obfuscation, and other malicious indicators, and asked to search the web for reports about the specific skill or its author. The audit verdict (`APPROVE: ...` or `DENY: ...`) is parsed from the subagent's report; anything that doesn't explicitly approve is fail-closed (the install is aborted and the temporary download is discarded). When `[subagent]` is disabled, the audit is skipped with a loud warning and a notice in the install output — operators who want autonomous installs without the security review can run that way deliberately, but the default deployment will have both enabled.
-
-### Subagents (optional)
-
-When `[subagent]` is enabled, the primary agent gains five tools (`subagent_run`, `subagent_spawn`, `subagent_wait`, `subagent_status`, `subagent_cancel`) and can delegate work to a child agent loop running under a configured profile. Profiles select an LLM endpoint, model, and sampler overrides; a synthesized `default` profile (matching `[api]`) is always available. The primary supplies all relevant context as the child's prompt; the child runs a fresh agent loop with the same tool surface (minus `sleep`, `update_*`, and nested `subagent_*`) and terminates by calling `subagent_report`, whose payload is returned to the primary. Synchronous runs (`subagent_run`) block the primary until the child reports; async runs (`subagent_spawn`) let the primary keep working while the report arrives in its inbox like an operator message. `subagent_wait(work_id)` is the bridge — block until a previously-spawned child reports, drain the report inline. Children share the primary's memory, search indexes, sandbox, and skills; they cannot see its conversation log and cannot themselves spawn further subagents.
-
-## Tools
-
-| Category | Tools |
-|----------|-------|
-| **Internet** | `web_fetch`, `wiki_fetch` |
-| **Memory** | `memory_read`, `memory_write`, `memory_edit`, `memory_append`, `memory_insert`, `memory_delete`, `memory_move`, `memory_restore`, `memory_list`, `memory_list_trash`, `memory_empty_trash`, `memory_search` (BM25 + semantic when `[embeddings]` enabled), `memory_grep` |
-| **System** | `context_status`, `get_time`, `sleep`, `send_message`, `get_version`, `rebuild_indexes` |
-| **Self-update** (when enabled) | `update_check`, `update_apply` |
-| **Sandbox** (when enabled) | `sandbox_write`, `sandbox_read`, `sandbox_edit`, `sandbox_append`, `sandbox_insert`, `sandbox_delete`, `sandbox_rename`, `sandbox_list`, `sandbox_execute`, `sandbox_shell`, `sandbox_install_package`, `sandbox_upgrade_package`, `sandbox_remove_package`, `sandbox_list_packages` |
-| **Skills** (when enabled, ≥1 skill) | `skill_activate`, `skill_read`, `skill_execute`, `skill_work_read` |
-| **Skills install** (when `install_enabled`) | `skill_install` |
-| **Subagents** (when enabled) | `subagent_run`, `subagent_spawn`, `subagent_wait`, `subagent_status`, `subagent_cancel` |
-| **Email** (when configured) | `email_fetch` |
-
-## Architecture
-
-Faultline follows hexagonal (ports & adapters) architecture: the agent loop is the domain hexagon, and external systems (LLM, memory, telegram, sandbox, IMAP, state persistence) are adapters behind interfaces the domain owns. See [AGENTS.md](AGENTS.md) for the full layout, port table, and per-package detail.
-
-## Contributing
-
-Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, etc.). [release-please](https://github.com/googleapis/release-please) derives version bumps and changelog entries from the commit log on `main`. The recommended workflow: open PRs with whatever messy commits you like, set the PR title to a single conventional-commit subject, and squash-merge.
-
-See AGENTS.md for the full conventional-commits table and other contributor notes.
-
-## License
-
-See [LICENSE](LICENSE) for details.
+OpenHarness is open-source software licensed under the [MIT License](LICENSE).
