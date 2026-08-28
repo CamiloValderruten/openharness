@@ -190,14 +190,24 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 
 		thinkingRaw, isThinking, cleanContent := extractThinking(m.Content)
 
+		var formattedContent template.HTML
+		if cleanContent != "" {
+			formattedContent = template.HTML(formatChatMarkdown(cleanContent))
+		}
+
+		var formattedThinking template.HTML
+		if thinkingRaw != "" {
+			formattedThinking = template.HTML(formatChatMarkdown(thinkingRaw))
+		}
+
 		item := ChatViewItem{
-			ID:           strings.ReplaceAll(m.Role, " ", "-") + "-" + strings.TrimSpace(strings.ReplaceAll(m.Content, "\n", ""))[:min(8, len(strings.TrimSpace(strings.ReplaceAll(m.Content, "\n", ""))))] + "-" + string(rune('0'+idx%10)),
+			ID:           strings.ReplaceAll(m.Role, " ", "-") + "-" + string(rune('0'+idx%10)),
 			Role:         m.Role,
 			ThinkingRaw:  thinkingRaw,
-			ThinkingHTML: template.HTML(formatChatMarkdown(thinkingRaw)),
+			ThinkingHTML: formattedThinking,
 			IsThinking:   isThinking,
 			RawText:      cleanContent,
-			Content:      template.HTML(formatChatMarkdown(cleanContent)),
+			Content:      formattedContent,
 			Timestamp:    time.Now().Format("15:04"),
 		}
 
@@ -215,7 +225,7 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 		}
 
 		// Only append if there's content, thinking, or tool calls
-		if strings.TrimSpace(cleanContent) != "" || strings.TrimSpace(thinkingRaw) != "" || isThinking || len(item.ToolCalls) > 0 {
+		if cleanContent != "" || thinkingRaw != "" || isThinking || len(item.ToolCalls) > 0 {
 			items = append(items, item)
 		}
 	}
@@ -225,34 +235,56 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 
 // extractThinking separates <think>...</think> reasoning blocks from user-visible response content.
 func extractThinking(raw string) (thinking string, isThinking bool, content string) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return "", false, ""
+	}
+
 	lower := strings.ToLower(raw)
 	startIdx := strings.Index(lower, "<think>")
-	if startIdx == -1 {
-		return "", false, strings.TrimSpace(raw)
-	}
+	endIdx := strings.Index(lower, "</think>")
 
-	before := strings.TrimSpace(raw[:startIdx])
-	afterStart := raw[startIdx+7:]
-	lowerAfter := strings.ToLower(afterStart)
-
-	endIdx := strings.Index(lowerAfter, "</think>")
-	if endIdx == -1 {
-		// Currently in-progress thinking block
-		thinking = strings.TrimSpace(afterStart)
-		return thinking, true, before
-	}
-
-	thinking = strings.TrimSpace(afterStart[:endIdx])
-	afterEnd := strings.TrimSpace(afterStart[endIdx+8:])
-	if before != "" && afterEnd != "" {
-		content = before + "\n\n" + afterEnd
-	} else if before != "" {
+	if startIdx != -1 && endIdx != -1 && endIdx > startIdx {
+		// Standard <think>...</think>
+		before := strings.TrimSpace(raw[:startIdx])
+		thinking = strings.TrimSpace(raw[startIdx+7 : endIdx])
+		after := strings.TrimSpace(raw[endIdx+8:])
+		if before != "" && after != "" {
+			content = before + "\n\n" + after
+		} else if before != "" {
+			content = before
+		} else {
+			content = after
+		}
+	} else if startIdx != -1 && endIdx == -1 {
+		// Currently thinking in progress (<think> without </think>)
+		before := strings.TrimSpace(raw[:startIdx])
+		thinking = strings.TrimSpace(raw[startIdx+7:])
+		isThinking = true
 		content = before
+	} else if startIdx == -1 && endIdx != -1 {
+		// Implicit opening <think>, closing </think> present
+		thinking = strings.TrimSpace(raw[:endIdx])
+		content = strings.TrimSpace(raw[endIdx+8:])
 	} else {
-		content = afterEnd
+		// No think tags
+		content = raw
 	}
 
-	return thinking, false, content
+	// Clean any stray tags
+	content = strings.ReplaceAll(content, "<think>", "")
+	content = strings.ReplaceAll(content, "</think>", "")
+	content = strings.ReplaceAll(content, "<THINK>", "")
+	content = strings.ReplaceAll(content, "</THINK>", "")
+	content = strings.TrimSpace(content)
+
+	thinking = strings.ReplaceAll(thinking, "<think>", "")
+	thinking = strings.ReplaceAll(thinking, "</think>", "")
+	thinking = strings.ReplaceAll(thinking, "<THINK>", "")
+	thinking = strings.ReplaceAll(thinking, "</THINK>", "")
+	thinking = strings.TrimSpace(thinking)
+
+	return thinking, isThinking, content
 }
 
 // formatChatMarkdown converts basic markdown syntax (code blocks, bold, newlines, etc.) to safe HTML.
