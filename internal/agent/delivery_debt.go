@@ -14,9 +14,9 @@ import (
 // text is not delivered to Discord/Telegram — only the send_* tools are.
 const collaboratorDeliveryDebtPrompt = `[Time: %s]
 
-Your collaborator is still waiting. Your previous assistant text was NOT delivered to them — only send_message / send_rich_message / send_voice_message reach Discord/Telegram.
+Your collaborator is still waiting on Discord. All direct assistant text you generate is shown to the human in the Web UI, but assistant text is NOT delivered to Discord — only send_message / send_rich_message / send_voice_message reach Discord.
 
-Call one of those tools NOW with your reply. You may use other tools first if you still need them; do not sleep and do not reply with text-only content.`
+Call one of those tools NOW with your reply so they receive it on Discord. You may use other tools first if you still need them; do not sleep and do not reply with text-only content.`
 
 // sleepBlockedByDeliveryDebt is returned when the model calls sleep while a
 // collaborator delivery debt is outstanding. Research tools stay allowed;
