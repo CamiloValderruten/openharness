@@ -1233,6 +1233,8 @@ func (a *Agent) appendInboxBatch(messages []llm.Message, batch []Item) []llm.Mes
 		switch it.Source {
 		case SourceCollaborator:
 			messages = a.appendCollaboratorMessages(messages, []string{it.Text})
+		case SourceWebChat:
+			messages = a.appendWebChatMessages(messages, []string{it.Text})
 		case SourceDaemon:
 			messages = a.appendDaemonAlerts(messages, []daemonpkg.Alert{{
 				DaemonID: it.ID,
@@ -1270,6 +1272,18 @@ func (a *Agent) appendInboxBatch(messages []llm.Message, batch []Item) []llm.Mes
 		default:
 			a.logger.Warn("dropping inbox item with unknown source", "source", it.Source)
 		}
+	}
+	return messages
+}
+
+// appendWebChatMessages injects direct user chat turns from the browser UI.
+func (a *Agent) appendWebChatMessages(messages []llm.Message, pending []string) []llm.Message {
+	for _, text := range pending {
+		a.logger.Info("injecting web chat message into conversation", "text", text)
+		messages = append(messages, llm.Message{
+			Role:    llm.RoleUser,
+			Content: text,
+		})
 	}
 	return messages
 }

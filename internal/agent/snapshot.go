@@ -353,7 +353,7 @@ func (a *Agent) PushUserMessage(text string) {
 	}
 	a.inbox.Push(Item{
 		Bucket: BucketHuman,
-		Source: SourceCollaborator,
+		Source: SourceWebChat,
 		Text:   text,
 	})
 }

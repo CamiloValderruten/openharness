@@ -31,6 +31,7 @@ type Source string
 
 const (
 	SourceCollaborator Source = "collaborator"
+	SourceWebChat      Source = "web_chat"
 	SourceDaemon       Source = "daemon"
 	SourceSubagent     Source = "subagent"
 	SourceScheduled    Source = "scheduled"
