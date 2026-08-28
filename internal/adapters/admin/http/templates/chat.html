@@ -11,14 +11,6 @@
 
   <!-- Chat Composer -->
   <div class="chat-composer">
-    <!-- Quick prompt chips -->
-    <div class="quick-chips">
-      <button type="button" class="chip-btn" onclick="sendQuickPrompt('What tools and capabilities do you currently have?')">⚡ Tools & Capabilities</button>
-      <button type="button" class="chip-btn" onclick="sendQuickPrompt('Check current system status and token usage.')">📊 System Status</button>
-      <button type="button" class="chip-btn" onclick="sendQuickPrompt('Search memories for recent context.')">🧠 Search Memories</button>
-      <button type="button" class="chip-btn" onclick="sendQuickPrompt('Run a quick python health check in the sandbox.')">🧪 Sandbox Test</button>
-    </div>
-
     <!-- Message Input Form -->
     <form id="chat-form"
           hx-post="/chat/send"
@@ -53,6 +45,9 @@
 </div>
 
 <script>
+  let openDetailsIds = new Set();
+  let wasNearBottom = true;
+
   function handleChatSubmit(e) {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
@@ -60,16 +55,11 @@
       e.preventDefault();
       return;
     }
+    wasNearBottom = true;
     setTimeout(() => {
       input.value = '';
       scrollToBottom();
     }, 50);
-  }
-
-  function sendQuickPrompt(text) {
-    const input = document.getElementById('chat-input');
-    input.value = text;
-    document.getElementById('chat-send-btn').click();
   }
 
   function scrollToBottom() {
@@ -86,11 +76,42 @@
     }
   });
 
-  document.addEventListener('DOMContentLoaded', scrollToBottom);
-  document.body.addEventListener('htmx:afterSwap', function(evt) {
-    if (evt.detail.target.id === 'chat-messages-container') {
-      scrollToBottom();
+  // Track scroll position and expanded accordions before HTMX swaps content
+  document.body.addEventListener('htmx:beforeSwap', function(evt) {
+    if (evt.detail.target && evt.detail.target.id === 'chat-messages-container') {
+      const container = evt.detail.target;
+      const threshold = 120; // px tolerance from bottom
+      wasNearBottom = (container.scrollHeight - container.scrollTop - container.clientHeight) <= threshold;
+
+      openDetailsIds.clear();
+      container.querySelectorAll('details[data-id]').forEach(el => {
+        if (el.open) {
+          openDetailsIds.add(el.getAttribute('data-id'));
+        }
+      });
     }
   });
+
+  // Restore expanded accordions and conditionally stick to bottom after swap
+  document.body.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target && evt.detail.target.id === 'chat-messages-container') {
+      const container = evt.detail.target;
+
+      // Restore user-opened details elements
+      container.querySelectorAll('details[data-id]').forEach(el => {
+        const id = el.getAttribute('data-id');
+        if (openDetailsIds.has(id)) {
+          el.open = true;
+        }
+      });
+
+      // Only scroll to bottom if user was ALREADY at or near bottom
+      if (wasNearBottom) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', scrollToBottom);
 </script>
 {{end}}

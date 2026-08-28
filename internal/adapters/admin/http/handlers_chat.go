@@ -13,12 +13,15 @@ import (
 
 // ChatViewItem is a UI-friendly representation of a message turn.
 type ChatViewItem struct {
-	ID        string
-	Role      string // "user" or "assistant" or "system"
-	Content   template.HTML
-	RawText   string
-	Timestamp string
-	ToolCalls []ChatToolCallItem
+	ID           string
+	Role         string // "user" or "assistant" or "system"
+	ThinkingRaw  string
+	ThinkingHTML template.HTML
+	IsThinking   bool
+	Content      template.HTML
+	RawText      string
+	Timestamp    string
+	ToolCalls    []ChatToolCallItem
 }
 
 // ChatToolCallItem is one tool call paired with its execution result.
@@ -174,7 +177,7 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 	}
 
 	var items []ChatViewItem
-	for _, m := range rawMsgs {
+	for idx, m := range rawMsgs {
 		// Skip raw system prompt messages and standalone tool-role messages (tool results are attached to assistant calls)
 		if m.Role == llm.RoleSystem || m.Role == llm.RoleTool {
 			continue
@@ -185,11 +188,17 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 			continue
 		}
 
+		thinkingRaw, isThinking, cleanContent := extractThinking(m.Content)
+
 		item := ChatViewItem{
-			Role:      m.Role,
-			RawText:   m.Content,
-			Content:   template.HTML(formatChatMarkdown(m.Content)),
-			Timestamp: time.Now().Format("15:04"),
+			ID:           strings.ReplaceAll(m.Role, " ", "-") + "-" + strings.TrimSpace(strings.ReplaceAll(m.Content, "\n", ""))[:min(8, len(strings.TrimSpace(strings.ReplaceAll(m.Content, "\n", ""))))] + "-" + string(rune('0'+idx%10)),
+			Role:         m.Role,
+			ThinkingRaw:  thinkingRaw,
+			ThinkingHTML: template.HTML(formatChatMarkdown(thinkingRaw)),
+			IsThinking:   isThinking,
+			RawText:      cleanContent,
+			Content:      template.HTML(formatChatMarkdown(cleanContent)),
+			Timestamp:    time.Now().Format("15:04"),
 		}
 
 		if m.Role == llm.RoleAssistant && len(m.ToolCalls) > 0 {
@@ -205,13 +214,45 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 			}
 		}
 
-		// Only append if there's content or tool calls
-		if strings.TrimSpace(m.Content) != "" || len(item.ToolCalls) > 0 {
+		// Only append if there's content, thinking, or tool calls
+		if strings.TrimSpace(cleanContent) != "" || strings.TrimSpace(thinkingRaw) != "" || isThinking || len(item.ToolCalls) > 0 {
 			items = append(items, item)
 		}
 	}
 
 	return items, active
+}
+
+// extractThinking separates <think>...</think> reasoning blocks from user-visible response content.
+func extractThinking(raw string) (thinking string, isThinking bool, content string) {
+	lower := strings.ToLower(raw)
+	startIdx := strings.Index(lower, "<think>")
+	if startIdx == -1 {
+		return "", false, strings.TrimSpace(raw)
+	}
+
+	before := strings.TrimSpace(raw[:startIdx])
+	afterStart := raw[startIdx+7:]
+	lowerAfter := strings.ToLower(afterStart)
+
+	endIdx := strings.Index(lowerAfter, "</think>")
+	if endIdx == -1 {
+		// Currently in-progress thinking block
+		thinking = strings.TrimSpace(afterStart)
+		return thinking, true, before
+	}
+
+	thinking = strings.TrimSpace(afterStart[:endIdx])
+	afterEnd := strings.TrimSpace(afterStart[endIdx+8:])
+	if before != "" && afterEnd != "" {
+		content = before + "\n\n" + afterEnd
+	} else if before != "" {
+		content = before
+	} else {
+		content = afterEnd
+	}
+
+	return thinking, false, content
 }
 
 // formatChatMarkdown converts basic markdown syntax (code blocks, bold, newlines, etc.) to safe HTML.
