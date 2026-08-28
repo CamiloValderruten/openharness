@@ -1,0 +1,96 @@
+{{define "content"}}
+<div class="chat-container">
+  <!-- Conversation Message Feed -->
+  <div id="chat-messages-container"
+       class="chat-messages"
+       hx-get="/admin/fragments/chat_messages"
+       hx-trigger="load, every 2s"
+       hx-swap="innerHTML">
+    <div class="text-xs text-slate-500 font-mono py-8 text-center">Connecting to OpenHarness chat stream...</div>
+  </div>
+
+  <!-- Chat Composer -->
+  <div class="chat-composer">
+    <!-- Quick prompt chips -->
+    <div class="quick-chips">
+      <button type="button" class="chip-btn" onclick="sendQuickPrompt('What tools and capabilities do you currently have?')">⚡ Tools & Capabilities</button>
+      <button type="button" class="chip-btn" onclick="sendQuickPrompt('Check current system status and token usage.')">📊 System Status</button>
+      <button type="button" class="chip-btn" onclick="sendQuickPrompt('Search memories for recent context.')">🧠 Search Memories</button>
+      <button type="button" class="chip-btn" onclick="sendQuickPrompt('Run a quick python health check in the sandbox.')">🧪 Sandbox Test</button>
+    </div>
+
+    <!-- Message Input Form -->
+    <form id="chat-form"
+          hx-post="/chat/send"
+          hx-target="#chat-messages-container"
+          hx-swap="innerHTML"
+          onsubmit="handleChatSubmit(event)"
+          class="flex flex-col gap-2">
+      <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+      <textarea id="chat-input"
+                name="message"
+                class="chat-input-textarea"
+                placeholder="Ask OpenHarness anything... (Press Enter to send, Shift+Enter for newline)"
+                rows="2"
+                required></textarea>
+      
+      <div class="chat-composer-footer">
+        <div class="text-[11px] text-slate-500 font-mono hidden sm:block">
+          <span>⚡ Enter to send &middot; Shift+Enter for new line</span>
+        </div>
+
+        <button type="submit"
+                id="chat-send-btn"
+                class="btn-modern btn-primary-modern text-xs px-4 py-1.5 ml-auto">
+          <span>Send</span>
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function handleChatSubmit(e) {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) {
+      e.preventDefault();
+      return;
+    }
+    setTimeout(() => {
+      input.value = '';
+      scrollToBottom();
+    }, 50);
+  }
+
+  function sendQuickPrompt(text) {
+    const input = document.getElementById('chat-input');
+    input.value = text;
+    document.getElementById('chat-send-btn').click();
+  }
+
+  function scrollToBottom() {
+    const el = document.getElementById('chat-messages-container');
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }
+
+  document.getElementById('chat-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.getElementById('chat-send-btn').click();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', scrollToBottom);
+  document.body.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target.id === 'chat-messages-container') {
+      scrollToBottom();
+    }
+  });
+</script>
+{{end}}

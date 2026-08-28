@@ -1,69 +1,62 @@
-<div class="card bg-base-100 shadow-sm">
-  <div class="card-body">
-    <div class="flex items-center justify-between">
-      <h2 class="card-title">Subagents</h2>
-      {{if .HasManager}}
-      <span class="text-sm opacity-70">
-        {{len .Active}} active · {{len .Profiles}} profile(s)
-      </span>
-      {{else}}
-      <span class="badge badge-ghost">disabled</span>
-      {{end}}
-    </div>
-
+<div class="flex flex-col gap-6">
+  <div>
+    <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Active Subagents ({{len .Active}})</div>
     {{if .HasManager}}
       {{if .Active}}
       <div class="overflow-x-auto">
-        <table class="table table-sm">
+        <table class="w-full text-left text-xs border-collapse">
           <thead>
-            <tr>
-              <th>Work ID</th>
-              <th>Profile</th>
-              <th>Mode</th>
-              <th>Elapsed</th>
-              <th>Prompt</th>
+            <tr class="border-b border-white/10 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
+              <th class="py-2.5 px-3 w-28">Work ID</th>
+              <th class="py-2.5 px-3 w-32">Profile</th>
+              <th class="py-2.5 px-3 w-20">Mode</th>
+              <th class="py-2.5 px-3 w-24">Elapsed</th>
+              <th class="py-2.5 px-3">Prompt Preview</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-white/5 font-mono">
             {{range .Active}}
-            <tr>
-              <td class="font-mono text-xs">{{.WorkID}}</td>
-              <td class="text-xs">{{.Profile}}</td>
-              <td class="text-xs">
+            <tr class="hover:bg-white/[0.02] transition-colors">
+              <td class="py-2 px-3 text-cyan-400 font-semibold">{{.WorkID}}</td>
+              <td class="py-2 px-3 text-white font-sans font-medium">{{.Profile}}</td>
+              <td class="py-2 px-3">
                 {{if .Async}}
-                <span class="badge badge-sm badge-info">async</span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] bg-cyan-500/15 text-cyan-300 border border-cyan-500/20">async</span>
                 {{else}}
-                <span class="badge badge-sm badge-outline">sync</span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300">sync</span>
                 {{end}}
               </td>
-              <td class="font-mono text-xs whitespace-nowrap">{{sinceShort .Started}}</td>
-              <td class="text-xs opacity-80 break-words">{{.Prompt}}</td>
+              <td class="py-2 px-3 text-slate-300">{{sinceShort .Started}}</td>
+              <td class="py-2 px-3 text-slate-400 font-sans break-all">{{.Prompt}}</td>
             </tr>
             {{end}}
           </tbody>
         </table>
       </div>
       {{else}}
-      <p class="opacity-60 italic text-sm">No subagents running right now.</p>
+      <div class="text-center py-6 text-xs text-slate-500 font-sans">No subagents running right now.</div>
       {{end}}
 
       {{if .Profiles}}
-      <div class="mt-4">
-        <h3 class="font-semibold text-sm mb-2 opacity-80">Available profiles</h3>
-        <div class="flex flex-wrap gap-2">
+      <div class="pt-6 border-t border-white/5">
+        <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Available profiles</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           {{range .Profiles}}
-          <div class="badge badge-outline" title="{{.Purpose}}">
-            {{.Name}}{{if .Model}} · <span class="opacity-60 ml-1">{{.Model}}</span>{{end}}
+          <div class="p-3.5 rounded-xl bg-[#111726] border border-white/5 flex flex-col gap-1.5" title="{{.Purpose}}">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white font-mono">{{.Name}}</span>
+              {{if .Model}}<span class="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">{{.Model}}</span>{{end}}
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">{{.Purpose}}</p>
           </div>
           {{end}}
         </div>
       </div>
       {{end}}
     {{else}}
-    <p class="opacity-70 text-sm">
-      Subagent delegation is not enabled in this configuration. Set
-      <code>[subagent] enabled = true</code> to turn it on.
-    </p>
+    <div class="text-center py-6 text-xs text-slate-500 font-sans">
+      Subagent delegation is not enabled in this configuration.
+    </div>
     {{end}}
   </div>
 </div>

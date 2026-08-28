@@ -1,0 +1,19 @@
+{{define "content"}}
+<div class="flex flex-col gap-6">
+  <div class="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-white/5">
+    <div>
+      <h1 class="text-xl font-bold text-white tracking-tight">Tool Execution Trace</h1>
+      <p class="text-xs text-slate-400">Real-time trace log of tool dispatches, latency, arguments and outputs</p>
+    </div>
+  </div>
+
+  <div class="card-modern">
+    <div id="tool-feed-full"
+         hx-get="/admin/fragments/tools"
+         hx-trigger="load, every 2s"
+         hx-swap="innerHTML">
+      <div class="text-center py-8 text-xs text-slate-500 font-mono">Loading tool execution trace...</div>
+    </div>
+  </div>
+</div>
+{{end}}

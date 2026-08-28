@@ -1,33 +1,31 @@
 {{define "content"}}
-<div class="flex flex-col gap-4">
-  <h1 class="terminal-section-title">// version &amp; updates</h1>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-    <div class="card bg-base-100">
-      <div class="card-body">
-        <div class="text-xs opacity-60">running</div>
-        <div class="stat-value glow">{{.Version}}</div>
-        <div class="text-xs opacity-60 mt-1">{{.GoVersion}}</div>
-      </div>
-    </div>
-    <div class="card bg-base-100">
-      <div class="card-body">
-        <div class="text-xs opacity-60">started</div>
-        <div class="stat-value glow text-3xl">{{.Uptime}}</div>
-        <div class="text-xs opacity-60 mt-1">since {{.StartedAt}}</div>
-      </div>
+<div class="flex flex-col gap-6">
+  <div class="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-white/5">
+    <div>
+      <h1 class="text-xl font-bold text-white tracking-tight">Version & Updates // version &amp; updates</h1>
+      <p class="text-xs text-slate-400">Manage OpenHarness runtime versions and GitHub releases</p>
     </div>
   </div>
 
-  <div id="update-card"
-       hx-get="/admin/fragments/update"
-       hx-trigger="load, every 30s"
-       hx-swap="innerHTML">
-    <div class="card bg-base-100">
-      <div class="card-body">
-        <div class="skeleton h-6 w-32 mb-2"></div>
-        <div class="skeleton h-4 w-full"></div>
-      </div>
+  <div class="admin-grid">
+    <div class="metric-card">
+      <div class="metric-label">Running Version</div>
+      <div class="metric-value font-mono text-xl text-white">{{.Version}}</div>
+      <div class="metric-sub">{{.GoVersion}}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Uptime</div>
+      <div class="metric-value font-mono text-xl text-white">{{.Uptime}}</div>
+      <div class="metric-sub">Started at {{.StartedAt}}</div>
+    </div>
+  </div>
+
+  <div class="card-modern">
+    <div id="update-card"
+         hx-get="/admin/fragments/update"
+         hx-trigger="load, every 30s"
+         hx-swap="innerHTML">
+      <div class="text-center py-8 text-xs text-slate-500 font-mono">Checking update status...</div>
     </div>
   </div>
 </div>

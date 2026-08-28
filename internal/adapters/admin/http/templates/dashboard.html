@@ -1,55 +1,47 @@
 {{define "content"}}
-<div class="flex flex-col gap-4">
-
-  <h1 class="terminal-section-title">// status overview</h1>
-
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-    <div class="card bg-base-100">
-      <div class="card-body">
-        <div class="text-xs opacity-60">openharness version</div>
-        <div class="stat-value glow">{{.Version}}</div>
-        <div class="text-xs opacity-60 mt-1">{{.GoVersion}}</div>
-      </div>
+<div class="flex flex-col gap-6">
+  <!-- Header / Summary -->
+  <div class="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-white/5">
+    <div>
+      <h1 class="text-xl font-bold text-white tracking-tight">System Overview // status overview</h1>
+      <p class="text-xs text-slate-400">Live operational telemetry and agent state</p>
     </div>
-    <div class="card bg-base-100">
-      <div class="card-body">
-        <div class="text-xs opacity-60">process uptime</div>
-        <div class="stat-value glow">{{.Uptime}}</div>
-        <div class="text-xs opacity-60 mt-1">since {{.StartedAt}}</div>
-      </div>
-    </div>
-    <div class="card bg-base-100">
-      <div class="card-body">
-        <div class="text-xs opacity-60">active admin sessions</div>
-        <div class="stat-value glow">{{.SessionCount}}</div>
-        <div class="text-xs opacity-60 mt-1">browsers signed in</div>
-      </div>
+    <div class="flex items-center gap-2">
+      <a href="/chat" class="btn-modern btn-primary-modern text-xs">
+        <span>Open Chat</span>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+        </svg>
+      </a>
     </div>
   </div>
 
+  <div class="text-xs text-slate-400">openharness version <span class="font-mono text-white">{{.Version}}</span></div>
+
+  <!-- Primary Agent Status Card -->
   <div id="agent-status"
        hx-get="/admin/fragments/status"
-       hx-trigger="load, every 1s"
+       hx-trigger="load, every 2s"
        hx-swap="innerHTML">
-    <div class="card bg-base-100">
-      <div class="card-body">
-        <div class="skeleton h-6 w-48 mb-2"></div>
-        <div class="skeleton h-4 w-full"></div>
-      </div>
-    </div>
+    <div class="p-8 text-center text-xs text-slate-500 font-mono">Loading agent status metrics...</div>
   </div>
 
-  <div id="tool-feed"
-       hx-get="/admin/fragments/tools"
-       hx-trigger="load, every 1s"
-       hx-swap="innerHTML">
-    <div class="card bg-base-100">
-      <div class="card-body">
-        <div class="skeleton h-6 w-40 mb-2"></div>
-        <div class="skeleton h-4 w-full"></div>
+  <!-- Live Tool Activity Feed Card -->
+  <div class="card-modern flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-base">📜</span>
+        <h2 class="text-sm font-semibold text-white">Recent Tool Invocations</h2>
       </div>
+      <a href="/admin/tools" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">View full trace &rarr;</a>
+    </div>
+
+    <div id="tool-feed"
+         hx-get="/admin/fragments/tools"
+         hx-trigger="load, every 2s"
+         hx-swap="innerHTML">
+      <div class="text-xs text-slate-500 font-mono py-4 text-center">Loading tool execution buffer...</div>
     </div>
   </div>
-
 </div>
 {{end}}

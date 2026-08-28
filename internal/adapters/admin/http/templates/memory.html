@@ -1,0 +1,74 @@
+{{define "content"}}
+<div class="flex flex-col gap-6">
+  <div class="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-white/5">
+    <div>
+      <h1 class="text-xl font-bold text-white tracking-tight">Memory Explorer</h1>
+      <p class="text-xs text-slate-400">Browse and inspect persistent agent memory files</p>
+    </div>
+    <div class="text-xs text-slate-400 font-mono">
+      <span>{{.TotalCount}} files indexed</span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- File List Column (4 cols) -->
+    <div class="lg:col-span-5 flex flex-col gap-3">
+      <div class="relative">
+        <input type="text"
+               id="memory-search"
+               placeholder="Search memory files..."
+               onkeyup="filterMemoryFiles()"
+               class="w-full px-3.5 py-2 rounded-xl bg-[#111726] border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+      </div>
+
+      <div id="memory-file-list" class="card-modern p-2 max-h-[650px] overflow-y-auto flex flex-col gap-1">
+        {{if not .Files}}
+          <div class="text-center py-8 text-xs text-slate-500">No memory files found in store.</div>
+        {{else}}
+          {{range .Files}}
+            <button type="button"
+                    class="memory-file-item text-left px-3 py-2.5 rounded-lg hover:bg-white/[0.04] transition-all flex items-center justify-between group focus:outline-none focus:bg-indigo-500/10 focus:border-indigo-500/30 border border-transparent"
+                    data-path="{{.Path}}"
+                    hx-get="/admin/fragments/memory_file?path={{.Path}}"
+                    hx-target="#memory-content-viewer"
+                    hx-swap="innerHTML">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-sm">📄</span>
+                <span class="text-xs font-mono text-slate-300 group-hover:text-white truncate">{{.Path}}</span>
+              </div>
+              <span class="text-[10px] text-slate-500 font-mono shrink-0 ml-2">{{.Size}} B</span>
+            </button>
+          {{end}}
+        {{end}}
+      </div>
+    </div>
+
+    <!-- File Viewer Column (7 cols) -->
+    <div class="lg:col-span-7">
+      <div class="card-modern min-h-[500px] flex flex-col">
+        <div id="memory-content-viewer" class="flex-1 flex flex-col">
+          <div class="m-auto text-center p-8 text-slate-500 flex flex-col items-center gap-2">
+            <span class="text-2xl">🧠</span>
+            <span class="text-xs">Select a memory file from the list to preview contents.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function filterMemoryFiles() {
+    const input = document.getElementById('memory-search').value.toLowerCase();
+    const items = document.querySelectorAll('.memory-file-item');
+    items.forEach(it => {
+      const path = it.getAttribute('data-path').toLowerCase();
+      if (path.includes(input)) {
+        it.style.display = 'flex';
+      } else {
+        it.style.display = 'none';
+      }
+    });
+  }
+</script>
+{{end}}

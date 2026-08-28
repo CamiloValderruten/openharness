@@ -1,95 +1,90 @@
-<div class="card bg-base-100 shadow-sm">
-  <div class="card-body">
-    <div class="flex items-center justify-between flex-wrap gap-2">
-      <h2 class="card-title">Self-update</h2>
-      {{if .HasUpdater}}
-        {{if .Enabled}}
-        <span class="badge badge-success">auto-update on</span>
-        {{else}}
-        <span class="badge badge-ghost">auto-update off</span>
-        {{end}}
-      {{else}}
-      <span class="badge badge-ghost">not wired</span>
-      {{end}}
-    </div>
-
-    {{if .FlashOK}}
-    <div class="alert alert-success py-2">
-      <span>{{.FlashOK}}</span>
-    </div>
-    {{end}}
-    {{if .FlashErr}}
-    <div class="alert alert-error py-2">
-      <span>{{.FlashErr}}</span>
-    </div>
-    {{end}}
-
+<div class="flex flex-col gap-4">
+  <div class="flex items-center justify-between flex-wrap gap-2">
+    <h2 class="text-sm font-semibold text-white">Self-update</h2>
     {{if .HasUpdater}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-      <div>
-        <div class="text-sm opacity-70">Current version</div>
-        <div class="font-mono text-lg">{{.CurrentVersion}}</div>
-      </div>
-      <div>
-        <div class="text-sm opacity-70">Latest known release</div>
-        <div class="font-mono text-lg">
-          {{if .LatestVersion}}
-            {{.LatestVersion}}
-            {{if .UpdateAvailable}}
-            <span class="badge badge-warning ml-2">new!</span>
-            {{else}}
-            <span class="badge badge-success ml-2">current</span>
-            {{end}}
-          {{else}}—{{end}}
-        </div>
-        <div class="text-xs opacity-60 mt-1">
-          last checked {{.LastChecked}}
-          {{if .Note}}· {{.Note}}{{end}}
-        </div>
-      </div>
-    </div>
-
-    {{if .Err}}
-    <div class="alert alert-warning mt-3">
-      <div class="flex flex-col gap-1">
-        <span class="font-semibold">Last check error</span>
-        <code class="text-xs whitespace-pre-wrap break-words">{{.Err}}</code>
-      </div>
-    </div>
-    {{end}}
-
-    {{if and .Enabled .UpdateAvailable}}
-    <div class="mt-4">
-      <form hx-post="/admin/update/apply"
-            hx-target="#update-card"
-            hx-swap="innerHTML"
-            hx-confirm="Apply the update now? The agent will shut down so the new binary can take over.">
-        <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
-        <button type="submit" class="btn btn-primary">
-          Apply update {{.CurrentVersion}} → {{.LatestVersion}}
-        </button>
-      </form>
-      <p class="text-xs opacity-60 mt-2">
-        Apply downloads the release tarball, verifies it against
-        SHA256SUMS, swaps the binary in place, and triggers
-        graceful shutdown. The supervisor (or your configured
-        restart_mode) brings the new binary up.
-      </p>
-    </div>
-    {{else if not .Enabled}}
-    <p class="opacity-70 text-sm mt-3">
-      Self-update is disabled in <code>[update]</code>. Set
-      <code>enabled = true</code> to allow the agent (and this
-      dashboard) to apply updates.
-    </p>
-    {{end}}
+      {{if .Enabled}}
+      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">auto-update on</span>
+      {{else}}
+      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">auto-update off</span>
+      {{end}}
     {{else}}
-    <p class="opacity-70 text-sm">
-      The updater is not wired into the admin server. This usually
-      means an unusual composition path; the standard
-      <code>cmd/openharness/main.go</code> wiring should always
-      attach it.
-    </p>
+    <span class="text-xs text-slate-500">not wired</span>
     {{end}}
   </div>
+
+  {{if .FlashOK}}
+  <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">
+    <span>{{.FlashOK}}</span>
+  </div>
+  {{end}}
+  {{if .FlashErr}}
+  <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+    <span>{{.FlashErr}}</span>
+  </div>
+  {{end}}
+
+  {{if .HasUpdater}}
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="p-4 rounded-xl bg-[#090d16] border border-white/5">
+      <div class="text-[11px] font-semibold uppercase text-slate-400 mb-1">Installed Version</div>
+      <div class="text-lg font-mono font-bold text-white">{{.CurrentVersion}}</div>
+    </div>
+    <div class="p-4 rounded-xl bg-[#090d16] border border-white/5">
+      <div class="text-[11px] font-semibold uppercase text-slate-400 mb-1">Latest GitHub Release</div>
+      <div class="flex items-center gap-2">
+        <span class="text-lg font-mono font-bold text-white">{{if .LatestVersion}}{{.LatestVersion}}{{else}}—{{end}}</span>
+        {{if .UpdateAvailable}}
+          <span class="badge badge-warning px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">new!</span>
+        {{else}}
+          <span class="badge badge-success px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">current</span>
+        {{end}}
+      </div>
+      <div class="text-[11px] text-slate-500 mt-1">
+        last checked {{.LastChecked}} {{if .Note}}· {{.Note}}{{end}}
+      </div>
+    </div>
+  </div>
+
+  {{if .Err}}
+  <div class="alert alert-warning p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs mt-3">
+    <div class="flex flex-col gap-1">
+      <span class="font-semibold">Last check error</span>
+      <code class="text-xs whitespace-pre-wrap break-words">{{.Err}}</code>
+    </div>
+  </div>
+  {{end}}
+
+  {{if and .Enabled .UpdateAvailable}}
+  <div class="mt-2">
+    <form hx-post="/admin/update/apply"
+          hx-target="#update-card"
+          hx-swap="innerHTML"
+          hx-confirm="Apply update now? OpenHarness will save state and restart with the new binary.">
+      <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+      <button type="submit" class="btn-modern btn-primary-modern text-xs px-4 py-2">
+        <span>Apply update {{.CurrentVersion}} → {{.LatestVersion}}</span>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+  {{else if not .Enabled}}
+  <p class="text-xs text-slate-400 mt-3">
+    Self-update is disabled in [update]. Set <code>enabled = true</code> to allow updates.
+  </p>
+  <form style="display:none;" hx-post="/admin/update/apply">
+    <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+  </form>
+  {{else}}
+  <form style="display:none;" hx-post="/admin/update/apply">
+    <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+  </form>
+  {{end}}
+
+  {{else}}
+  <div class="text-center py-6 text-xs text-slate-500 font-sans">
+    The updater is not wired into the admin server.
+  </div>
+  {{end}}
 </div>

@@ -1,20 +1,36 @@
 {{define "content"}}
-<div class="flex flex-col gap-3">
-  <h1 class="terminal-section-title">// log stream</h1>
-
-  <div class="flex items-center gap-3 flex-wrap text-sm">
-    <span class="opacity-70">tail of today's log</span>
+<div class="flex flex-col gap-6">
+  <div class="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-white/5">
+    <div>
+      <h1 class="text-xl font-bold text-white tracking-tight">System Logs // log stream</h1>
+      <p class="text-xs text-slate-400">Live tail of daily rotated application logs</p>
+    </div>
     {{if .LogPath}}
-    <span class="font-mono opacity-60">{{.LogPath}}</span>
+    <span class="text-xs font-mono text-slate-400 bg-white/5 px-2.5 py-1 rounded-md border border-white/10">{{.LogPath}}</span>
     {{end}}
-    <span class="ml-auto opacity-60">refreshing every 2s</span>
   </div>
 
-  <div id="log-stream"
-       hx-get="/admin/fragments/logs"
-       hx-trigger="load, every 2s"
-       hx-swap="innerHTML">
-    <div class="log-view">loading…</div>
+  <div class="card-modern p-0 overflow-hidden bg-[#080b12] border-white/10">
+    <div class="flex items-center justify-between px-4 py-2.5 bg-[#0f1523] border-b border-white/10 text-xs">
+      <div class="flex items-center gap-2 text-slate-400">
+        <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+        <span class="font-mono text-[11px] text-slate-300 ml-2">openharness.log</span>
+      </div>
+      <div class="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
+        <span class="status-dot online"></span>
+        <span>live tailing (every 2s)</span>
+      </div>
+    </div>
+
+    <div id="log-stream"
+         hx-get="/admin/fragments/logs"
+         hx-trigger="load, every 2s"
+         hx-swap="innerHTML"
+         class="p-4 font-mono text-xs text-slate-300 overflow-y-auto max-h-[600px] min-h-[400px] leading-relaxed select-text">
+      <div class="text-slate-500">Connecting to log stream...</div>
+    </div>
   </div>
 </div>
 {{end}}

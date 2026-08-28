@@ -7,23 +7,24 @@ import (
 
 	skillsfs "github.com/CamiloValderruten/openharness/internal/adapters/skills/fs"
 	"github.com/CamiloValderruten/openharness/internal/agent"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 	"github.com/CamiloValderruten/openharness/internal/subagent"
 	"github.com/CamiloValderruten/openharness/internal/tools"
 	"github.com/CamiloValderruten/openharness/internal/update"
 )
 
-// AgentInspector is the read-only port the admin server uses to
-// snapshot the primary agent's state. Consumer-defined: the agent
-// package exposes the concrete *Agent which satisfies it
-// structurally. Driving adapters may depend on the domain (the rule
-// is the domain mustn't depend on the adapter), so importing
-// internal/agent for the snapshot type is fine.
-//
-// Nil-allowed: when stage 2 left this unset the dashboard rendered
-// empty placeholders. With stage 3 wired the composition root passes
-// the live agent.
+// AgentInspector is the read-only and chat port the web server uses to
+// snapshot the primary agent's state and drive the web chat.
 type AgentInspector interface {
 	Snapshot() agent.AgentSnapshot
+	Messages() []llm.Message
+	PushUserMessage(text string)
+}
+
+// MemoryAdmin is the read-only memory browsing port.
+type MemoryAdmin interface {
+	AllFiles() (map[string]string, error)
+	Read(path string) (string, error)
 }
 
 // SubagentInspector exposes the primary's subagent.Manager state

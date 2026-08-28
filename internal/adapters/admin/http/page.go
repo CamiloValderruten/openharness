@@ -5,73 +5,79 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/CamiloValderruten/openharness/internal/agent"
 	"github.com/CamiloValderruten/openharness/internal/version"
 )
 
 // pageData is the common set of fields every full-page render needs:
-// auth state for the layout, navigation metadata for the sidebar +
-// navbar, and a few global stats the layout footer surfaces. Every
-// concrete page-data struct embeds this so the layout can reach the
-// fields uniformly.
+// auth state for the layout, navigation metadata, and status info.
 type pageData struct {
 	Title         string
 	Authenticated bool
 	Username      string
 	CSRFToken     string
 
-	// Section is the current sidebar section's stable key
-	// ("dashboard", "configuration", ...). Used by the layout to
-	// mark the active nav row.
+	// TopTab selects the top-level mode: "chat" or "admin".
+	TopTab string
+
+	// Section is the admin sidebar / sub-tab section's key.
 	Section string
-	// SectionLabel is the human-facing title shown in the navbar
-	// for the current page.
+	// SectionLabel is the human-facing title.
 	SectionLabel string
 
-	// Nav is the list of sidebar items, with .Active set on the
-	// current page.
+	// Nav is the list of admin section items.
 	Nav []navItem
 
-	// Common stats surfaced in the layout footer / navbar.
-	Version   string
-	GoVersion string
-	Uptime    string
-	StartedAt string
+	// Common stats surfaced in the header / footer.
+	Version      string
+	GoVersion    string
+	Uptime       string
+	StartedAt    string
+	StatusPhase  string
+	StatusLabel  string
+	StatusClass  string
+	TokenEst     int
+	MaxTokens    int
+	TotalChats   int64
+	TotalTools   int64
 }
 
 type navItem struct {
 	Key    string
 	Href   string
 	Label  string
+	Icon   string
 	Active bool
 }
 
-// navItems is the canonical sidebar order. Adding a new section is
-// a one-line change here plus a new content template + route.
+// navItems is the canonical admin navigation list.
 var navItems = []navItem{
-	{Key: "dashboard", Href: "/admin", Label: "dashboard"},
-	{Key: "configuration", Href: "/admin/configuration", Label: "configuration"},
-	{Key: "subagents", Href: "/admin/subagents", Label: "subagent"},
-	{Key: "skills", Href: "/admin/skills", Label: "skills"},
-	{Key: "version", Href: "/admin/version", Label: "version"},
-	{Key: "logs", Href: "/admin/logs", Label: "logs"},
+	{Key: "dashboard", Href: "/admin", Label: "Dashboard", Icon: "📊"},
+	{Key: "memory", Href: "/admin/memory", Label: "Memory Explorer", Icon: "🧠"},
+	{Key: "skills", Href: "/admin/skills", Label: "Skills Catalog", Icon: "🧩"},
+	{Key: "subagents", Href: "/admin/subagents", Label: "Subagents Hub", Icon: "🤖"},
+	{Key: "tools", Href: "/admin/tools", Label: "Tool Trace", Icon: "📜"},
+	{Key: "configuration", Href: "/admin/configuration", Label: "Configuration", Icon: "⚙️"},
+	{Key: "version", Href: "/admin/version", Label: "Version & Updates", Icon: "🔄"},
+	{Key: "logs", Href: "/admin/logs", Label: "System Logs", Icon: "📋"},
 }
 
-// sectionLabels maps section keys to the navbar title.
+// sectionLabels maps section keys to human readable titles.
 var sectionLabels = map[string]string{
-	"dashboard":     "dashboard",
-	"configuration": "configuration",
-	"subagents":     "subagent stream",
-	"skills":        "skills catalog",
-	"version":       "version & updates",
-	"logs":          "log stream",
+	"chat":          "Chat with OpenHarness",
+	"dashboard":     "System Overview",
+	"memory":        "Memory Explorer",
+	"configuration": "Configuration Editor",
+	"subagents":     "Subagents Hub",
+	"skills":        "Skills Catalog",
+	"tools":         "Tool Execution Trace",
+	"version":       "Version & Self-Update",
+	"logs":          "Live System Logs",
 }
 
 // basePageData fills the boilerplate every authenticated page needs.
-// Section must be a key present in navItems; an unknown key still
-// renders but no row is highlighted.
 func (s *Server) basePageData(r *http.Request, section string) pageData {
 	sess := sessionFromContext(r.Context())
-
 	uptime := time.Since(s.deps.StartedAt).Round(time.Second)
 
 	nav := make([]navItem, len(navItems))
@@ -85,9 +91,51 @@ func (s *Server) basePageData(r *http.Request, section string) pageData {
 		label = section
 	}
 
+	topTab := "admin"
+	if section == "chat" {
+		topTab = "chat"
+	}
+
+	statusPhase := "idle"
+	statusLabel := "Online (Idle)"
+	statusClass := "online"
+	var tokenEst, maxTokens int
+	var totalChats, totalTools int64
+
+	if s.deps.Agent != nil {
+		snap := s.deps.Agent.Snapshot()
+		tokenEst = snap.TokenEstimate
+		maxTokens = snap.MaxTokens
+		totalChats = snap.TotalChats
+		totalTools = snap.TotalToolCalls
+		switch snap.Phase {
+		case agent.PhaseGenerating:
+			statusPhase = "generating"
+			statusLabel = "Thinking..."
+			statusClass = "generating"
+		case agent.PhaseExecutingTool:
+			statusPhase = "tool"
+			statusLabel = "Executing Tool..."
+			statusClass = "tool"
+		case agent.PhaseCompacting:
+			statusPhase = "compacting"
+			statusLabel = "Compacting Context..."
+			statusClass = "generating"
+		case agent.PhaseStopped:
+			statusPhase = "stopped"
+			statusLabel = "Stopped"
+			statusClass = "offline"
+		default:
+			statusPhase = "idle"
+			statusLabel = "Online"
+			statusClass = "online"
+		}
+	}
+
 	pd := pageData{
 		Title:         label,
 		Authenticated: true,
+		TopTab:        topTab,
 		Section:       section,
 		SectionLabel:  label,
 		Nav:           nav,
@@ -95,6 +143,13 @@ func (s *Server) basePageData(r *http.Request, section string) pageData {
 		GoVersion:     runtime.Version(),
 		Uptime:        uptime.String(),
 		StartedAt:     s.deps.StartedAt.UTC().Format(time.RFC3339),
+		StatusPhase:   statusPhase,
+		StatusLabel:   statusLabel,
+		StatusClass:   statusClass,
+		TokenEst:      tokenEst,
+		MaxTokens:     maxTokens,
+		TotalChats:    totalChats,
+		TotalTools:    totalTools,
 	}
 	if sess != nil {
 		pd.Username = sess.Username

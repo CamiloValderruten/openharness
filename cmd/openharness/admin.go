@@ -149,6 +149,14 @@ func (a *adminServer) AttachSkills(sk adminhttp.SkillsAdmin) {
 	a.srv.SetSkillsAdmin(sk)
 }
 
+// AttachMemory wires the read-only Memory browsing port.
+func (a *adminServer) AttachMemory(m adminhttp.MemoryAdmin) {
+	if a == nil {
+		return
+	}
+	a.srv.SetMemoryAdmin(m)
+}
+
 // AttachUpdater wires the self-update port. The Updater is always
 // constructed (even when [update] is disabled) so the get_version
 // tool works; this method is therefore called unconditionally when

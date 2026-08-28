@@ -1,0 +1,7 @@
+<div class="status-pill">
+  <span class="status-dot {{.Class}}"></span>
+  <span class="text-xs font-medium">{{.Label}}</span>
+  {{if gt .Tokens 0}}
+    <span class="text-[11px] text-slate-500 font-mono hidden md:inline">({{.Tokens}} tokens)</span>
+  {{end}}
+</div>

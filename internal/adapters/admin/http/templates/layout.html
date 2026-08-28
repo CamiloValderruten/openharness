@@ -1,100 +1,116 @@
 {{define "layout"}}<!doctype html>
-<html lang="en" data-theme="matrix">
+<html lang="en" class="dark">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{{.Title}} :: openharness</title>
-  <link rel="preload" href="/admin/static/fonts/vt323.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/admin/static/fonts/sharetechmono.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/admin/static/daisyui.css">
-  <link rel="stylesheet" href="/admin/static/daisyui-themes.css">
-  <link rel="stylesheet" href="/admin/static/terminal.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} :: OpenHarness</title>
+  <link rel="stylesheet" href="/admin/static/modern.css">
   <script src="/admin/static/tailwind.js"></script>
   <script src="/admin/static/htmx.min.js"></script>
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
 </head>
-<body class="bg-base-200 min-h-screen">
+<body class="bg-[#090d16] text-[#f8fafc] min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
   {{if .Authenticated}}
-    <div class="drawer lg:drawer-open">
-      <input id="openharness-drawer" type="checkbox" class="drawer-toggle">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="flex items-center gap-6">
+        <a href="/chat" class="brand-badge group">
+          <div class="brand-icon">
+            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <span class="tracking-tight font-bold bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">OpenHarness</span>
+        </a>
 
-      <div class="drawer-content flex flex-col min-h-screen">
-        {{template "navbar" .}}
-        <main class="flex-1 p-4 md:p-6">
-          {{template "content" .}}
-        </main>
-        <footer class="text-xs opacity-60 px-4 py-3 border-t border-base-300">
-          openharness {{.Version}} &middot; signed in as
-          <span class="font-mono">{{.Username}}</span> &middot;
-          <span class="terminal-prompt">connection established</span>
-        </footer>
+        <!-- Top-level Mode Switcher -->
+        <nav class="nav-tabs">
+          <a href="/chat" class="nav-tab {{if eq .TopTab "chat"}}active{{end}}">
+            <span>💬</span>
+            <span>Chat</span>
+          </a>
+          <a href="/admin" class="nav-tab {{if eq .TopTab "admin"}}active{{end}}">
+            <span>⚡</span>
+            <span>Control Center</span>
+          </a>
+        </nav>
       </div>
 
-      <div class="drawer-side z-20">
-        <label for="openharness-drawer" aria-label="close sidebar"
-               class="drawer-overlay"></label>
-        <aside class="openharness-sidebar w-64">
-          <div class="px-4 mb-4">
-            <a href="/admin" class="openharness-brand">OPENHARNESS</a>
-            <div class="text-xs opacity-60 mt-1">{{.Version}}</div>
+      <div class="flex items-center gap-4">
+        <!-- Live Agent Loop Status -->
+        <div id="header-status-pill"
+             hx-get="/admin/fragments/chat_status"
+             hx-trigger="every 2s"
+             hx-swap="innerHTML">
+          <div class="status-pill">
+            <span class="status-dot {{.StatusClass}}"></span>
+            <span class="text-xs font-medium">{{.StatusLabel}}</span>
           </div>
-          <ul class="menu w-full px-0">
-            <li class="menu-title px-4">// navigation</li>
-            {{range .Nav}}
-            <li>
-              <a href="{{.Href}}" class="{{if .Active}}active{{end}}">
-                <span class="nav-marker">{{if .Active}}▶{{else}}·{{end}}</span>
-                <span>{{.Label}}</span>
-              </a>
-            </li>
-            {{end}}
-          </ul>
+        </div>
 
-          <div class="mt-auto px-4 py-3 border-t border-base-300">
-            <form method="POST" action="/admin/logout">
-              <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
-              <button class="btn btn-sm btn-ghost w-full justify-start"
-                      type="submit">
-                <span class="opacity-70">[</span>
-                <span>logout</span>
-                <span class="opacity-70">]</span>
-              </button>
-            </form>
+        <!-- User profile & Logout -->
+        <div class="flex items-center gap-3 pl-3 border-l border-white/10">
+          <span class="text-xs text-slate-400 font-mono hidden sm:inline">{{.Username}}</span>
+          <form method="POST" action="/admin/logout">
+            <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+            <button class="btn-modern btn-ghost-modern text-xs px-2.5 py-1" type="submit" title="Sign out">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+              </svg>
+              <span class="hidden md:inline">Sign out</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main View Content -->
+    {{if eq .TopTab "chat"}}
+      <main class="flex-1 flex flex-col overflow-hidden">
+        {{template "content" .}}
+      </main>
+    {{else}}
+      <!-- Admin / Control Center View with Sub-Navigation -->
+      <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 md:p-6 gap-6">
+        <!-- Admin Sidebar -->
+        <aside class="w-full md:w-56 shrink-0 flex flex-col gap-1">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-3 mb-2">Control Panel</div>
+          {{range .Nav}}
+            <a href="{{.Href}}"
+               class="{{if .Active}}active{{end}}"
+               data-key="{{.Key}}">
+              <div class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all {{if .Active}}bg-[#182238] text-white border border-white/10 shadow-sm{{else}}text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]{{end}}">
+                <span class="text-base">{{.Icon}}</span>
+                <span>{{.Label}}</span>
+                <span class="sr-only">{{.Key}}</span>
+              </div>
+            </a>
+          {{end}}
+
+          <div class="mt-auto pt-6 px-3 text-[11px] text-slate-500 font-mono flex flex-col gap-1 border-t border-white/5">
+            <div>openharness version {{.Version}}</div>
+            <div>uptime {{.Uptime}}</div>
           </div>
         </aside>
+
+        <!-- Admin Content Area -->
+        <main class="flex-1 min-w-0 flex flex-col">
+          {{template "content" .}}
+        </main>
       </div>
-    </div>
+    {{end}}
+
+    <footer class="text-xs text-slate-500 px-6 py-3 border-t border-white/5 flex items-center justify-between">
+      <div>openharness version {{.Version}} &middot; signed in as <span class="font-mono text-slate-400">{{.Username}}</span></div>
+      <div class="text-[11px]">Go {{.GoVersion}} &middot; uptime {{.Uptime}}</div>
+    </footer>
+
   {{else}}
-    {{template "content" .}}
+    <!-- Unauthenticated Layout (Login) -->
+    <main class="flex-1 flex items-center justify-center p-4">
+      {{template "content" .}}
+    </main>
   {{end}}
 </body>
 </html>
-{{end}}
-
-{{define "navbar"}}
-<div class="openharness-navbar navbar px-4 py-2">
-  <div class="flex-none lg:hidden">
-    <label for="openharness-drawer" aria-label="open sidebar"
-           class="btn btn-square btn-ghost">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-           stroke="currentColor" class="inline-block h-6 w-6 stroke-current">
-        <path stroke-linecap="square" stroke-linejoin="miter"
-              stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    </label>
-  </div>
-  <div class="flex-1">
-    <span class="terminal-section-title m-0 border-l-0 pl-0">
-      // {{.SectionLabel}}
-    </span>
-  </div>
-  <div class="flex-none gap-3 text-xs opacity-70">
-    <span class="hidden md:inline">
-      uptime <span class="font-mono">{{.Uptime}}</span>
-    </span>
-    <span class="hidden md:inline">
-      <span class="badge badge-sm badge-success glow">online</span>
-    </span>
-  </div>
-</div>
 {{end}}

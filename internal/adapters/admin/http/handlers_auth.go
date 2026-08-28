@@ -113,7 +113,7 @@ func (s *Server) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     sessionCookieName,
 		Value:    sess.Token,
-		Path:     "/admin",
+		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Secure:   isLikelyTLS(r),
@@ -140,7 +140,7 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     sessionCookieName,
 		Value:    "",
-		Path:     "/admin",
+		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Secure:   isLikelyTLS(r),
@@ -214,7 +214,7 @@ func setLoginCSRFCookie(w http.ResponseWriter, value string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     loginCSRFCookie,
 		Value:    value,
-		Path:     "/admin",
+		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 		MaxAge:   int(loginCSRFTTL.Seconds()),
@@ -239,7 +239,7 @@ func clearLoginCSRF(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     loginCSRFCookie,
 		Value:    "",
-		Path:     "/admin",
+		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 		MaxAge:   -1,

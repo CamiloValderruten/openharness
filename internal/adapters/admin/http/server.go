@@ -73,6 +73,9 @@ type Deps struct {
 	// Skills is the read+write port for the Skills section.
 	Skills SkillsAdmin
 
+	// Memory is the read-only memory browsing port.
+	Memory MemoryAdmin
+
 	// Update is the read+write port for the self-update pane.
 	Update UpdateInspector
 
@@ -96,7 +99,10 @@ type Server struct {
 // collapse the {{define "content"}} blocks across content files.
 var contentTemplates = []string{
 	"login.html",
+	"chat.html",
 	"dashboard.html",
+	"memory.html",
+	"tools.html",
 	"configuration.html",
 	"subagents.html",
 	"skills.html",
@@ -107,6 +113,9 @@ var contentTemplates = []string{
 // fragmentTemplates are stand-alone HTMX-fragment templates rendered
 // without a surrounding layout.
 var fragmentTemplates = []string{
+	"frag_chat_messages.html",
+	"frag_chat_status.html",
+	"frag_memory.html",
 	"frag_status.html",
 	"frag_tools.html",
 	"frag_subagents.html",
@@ -214,6 +223,9 @@ func (s *Server) SetInspectors(agent AgentInspector, subs SubagentInspector) {
 // SetSkillsAdmin wires the Skills toggle port.
 func (s *Server) SetSkillsAdmin(sk SkillsAdmin) { s.deps.Skills = sk }
 
+// SetMemoryAdmin wires the Memory browsing port.
+func (s *Server) SetMemoryAdmin(m MemoryAdmin) { s.deps.Memory = m }
+
 // SetUpdateInspector wires the self-update read+write port.
 func (s *Server) SetUpdateInspector(u UpdateInspector) { s.deps.Update = u }
 
@@ -238,9 +250,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	// Vendored static assets ship inside the binary, so they are
 	// effectively immutable for the lifetime of a deployment. Tag
 	// them with a far-future cache header so the browser doesn't
-	// revalidate fonts / CSS / JS on every navigation — without
-	// this, full-page navigations briefly redraw with fallback
-	// fonts before the WOFF2 cache hit settles.
+	// revalidate fonts / CSS / JS on every navigation.
 	staticHandler := http.StripPrefix("/admin/static/", http.FileServer(http.FS(s.staticSub)))
 	mux.Handle("GET /admin/static/", cacheImmutable(staticHandler))
 
@@ -249,9 +259,23 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /admin/login", s.handleLoginPost)
 	mux.HandleFunc("POST /admin/logout", s.requireAuth(s.handleLogout))
 
-	// Pages: each section in the sidebar is its own GET endpoint.
+	// Root redirects to chat
+	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/chat", http.StatusFound)
+	})
+
+	// Chat Views & Actions
+	mux.HandleFunc("GET /chat", s.requireAuth(s.handleChatPage))
+	mux.HandleFunc("POST /chat/send", s.requireAuth(s.handleChatSend))
+	mux.HandleFunc("GET /admin/fragments/chat_messages", s.requireAuth(s.handleFragChatMessages))
+	mux.HandleFunc("GET /admin/fragments/chat_status", s.requireAuth(s.handleFragChatStatus))
+
+	// Admin Pages
 	mux.HandleFunc("GET /admin/{$}", s.requireAuth(s.handleDashboard))
 	mux.HandleFunc("GET /admin", s.requireAuth(s.handleDashboard))
+	mux.HandleFunc("GET /admin/memory", s.requireAuth(s.handleMemoryPage))
+	mux.HandleFunc("GET /admin/fragments/memory_file", s.requireAuth(s.handleFragMemoryFile))
+	mux.HandleFunc("GET /admin/tools", s.requireAuth(s.handleToolsPage))
 	mux.HandleFunc("GET /admin/configuration", s.requireAuth(s.handleConfiguration))
 	mux.HandleFunc("GET /admin/subagents", s.requireAuth(s.handleSubagentsPage))
 	mux.HandleFunc("GET /admin/skills", s.requireAuth(s.handleSkillsPage))
@@ -276,7 +300,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /admin/configuration/save", s.requireAuth(s.handleConfigurationSave))
 	mux.HandleFunc("POST /admin/config/restart", s.requireAuth(s.handleConfigRestart))
 
-	// Anything not under /admin gets 404.
+	// Anything not recognized gets 404.
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 	})

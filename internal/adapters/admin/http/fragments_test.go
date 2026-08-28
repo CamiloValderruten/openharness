@@ -15,14 +15,21 @@ import (
 
 	"github.com/CamiloValderruten/openharness/internal/adapters/auth/users"
 	"github.com/CamiloValderruten/openharness/internal/agent"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 	"github.com/CamiloValderruten/openharness/internal/subagent"
 	"github.com/CamiloValderruten/openharness/internal/tools"
 )
 
 // fakeAgentInspector is a deterministic inspector for fragment tests.
-type fakeAgentInspector struct{ snap agent.AgentSnapshot }
+type fakeAgentInspector struct {
+	snap     agent.AgentSnapshot
+	messages []llm.Message
+	pushed   []string
+}
 
 func (f *fakeAgentInspector) Snapshot() agent.AgentSnapshot { return f.snap }
+func (f *fakeAgentInspector) Messages() []llm.Message       { return f.messages }
+func (f *fakeAgentInspector) PushUserMessage(text string)   { f.pushed = append(f.pushed, text) }
 
 // fakeSubagentInspector is a deterministic inspector for fragment tests.
 type fakeSubagentInspector struct {

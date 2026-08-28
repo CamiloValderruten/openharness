@@ -443,6 +443,7 @@ func (a *Agent) Run(ctx context.Context, shutdownCh <-chan struct{}) error {
 		messages = newMessages
 		prompts = newPrompts
 	}
+	a.recordMessages(messages)
 
 	// Track the message log length and idle streak at the moment of the
 	// last successful save. We only re-save when something has actually
@@ -527,6 +528,7 @@ func (a *Agent) Run(ctx context.Context, shutdownCh <-chan struct{}) error {
 			activeSubagents = a.subagents.ActiveCount()
 		}
 		a.recordIterationTop(len(messages), tokenEst, idleStreak, toolErrorStreak, 0, activeSubagents)
+		a.recordMessages(messages)
 		if tokenEst > a.cfg.Agent.CompactionThreshold {
 			a.logger.Warn("context at compaction threshold, compacting",
 				"tokens_est", tokenEst, "threshold", a.cfg.Agent.CompactionThreshold)
@@ -843,6 +845,7 @@ func (a *Agent) Run(ctx context.Context, shutdownCh <-chan struct{}) error {
 		a.logger.Debug("turn complete",
 			"messages", len(messages),
 			"tokens_est", a.countMessageTokens(messages))
+		a.recordMessages(messages)
 		turn++
 	}
 }

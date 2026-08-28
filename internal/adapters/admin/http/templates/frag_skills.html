@@ -1,74 +1,65 @@
-<div class="card bg-base-100 shadow-sm">
-  <div class="card-body">
-    <div class="flex items-center justify-between">
-      <h2 class="card-title">Skills</h2>
-      {{if .HasSkills}}
-      <span class="text-sm opacity-70">
-        {{len .Skills}} discovered
-      </span>
-      {{else}}
-      <span class="badge badge-ghost">disabled</span>
-      {{end}}
-    </div>
+<div class="flex flex-col gap-4">
+  {{if .FlashOK}}
+  <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">
+    {{.FlashOK}}
+  </div>
+  {{end}}
+  {{if .FlashErr}}
+  <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+    {{.FlashErr}}
+  </div>
+  {{end}}
 
-    {{if .FlashOK}}
-    <div class="alert alert-success py-2">
-      <span>{{.FlashOK}}</span>
-    </div>
-    {{end}}
-    {{if .FlashErr}}
-    <div class="alert alert-error py-2">
-      <span>{{.FlashErr}}</span>
-    </div>
-    {{end}}
-
-    {{if .HasSkills}}
-      {{if .Skills}}
-      <div class="overflow-x-auto">
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th class="w-32">Enabled</th>
-              <th>Name</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{range .Skills}}
-            <tr class="{{if .Disabled}}opacity-50{{end}}">
-              <td>
-                <form hx-post="/admin/skills/toggle"
-                      hx-target="#skills-card"
-                      hx-swap="innerHTML">
-                  <input type="hidden" name="_csrf" value="{{$.CSRFToken}}">
-                  <input type="hidden" name="name" value="{{.Name}}">
-                  <input type="checkbox" name="enabled"
-                         class="toggle toggle-success"
+  {{if .HasSkills}}
+    {{if .Skills}}
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="border-b border-white/10 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
+            <th class="py-2.5 px-3 w-28">Status</th>
+            <th class="py-2.5 px-3 w-48">Skill Name</th>
+            <th class="py-2.5 px-3">Description</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          {{range .Skills}}
+          <tr class="hover:bg-white/[0.02] transition-colors {{if .Disabled}}opacity-50{{end}}">
+            <td class="py-3 px-3">
+              <form hx-post="/admin/skills/toggle"
+                    hx-target="#skills-card"
+                    hx-swap="innerHTML">
+                <input type="hidden" name="_csrf" value="{{$.CSRFToken}}">
+                <input type="hidden" name="name" value="{{.Name}}">
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox"
+                         name="enabled"
+                         class="sr-only peer"
                          {{if not .Disabled}}checked{{end}}
                          onchange="this.form.requestSubmit();">
-                </form>
-              </td>
-              <td class="font-mono text-sm">{{.Name}}</td>
-              <td class="text-sm opacity-80">{{.Description}}</td>
-            </tr>
-            {{end}}
-          </tbody>
-        </table>
-      </div>
-      {{else}}
-      <p class="opacity-60 italic text-sm">
-        No skills discovered. Drop a skill folder into your skills
-        root and the agent will pick it up at the next context
-        rebuild.
-      </p>
-      {{end}}
+                  <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </form>
+            </td>
+            <td class="py-3 px-3 font-mono font-semibold text-white">
+              <div class="flex items-center gap-1.5">
+                <span>🧩</span>
+                <span>{{.Name}}</span>
+              </div>
+            </td>
+            <td class="py-3 px-3 text-slate-300 leading-relaxed">{{.Description}}</td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
     {{else}}
-    <p class="opacity-70 text-sm">
-      Skills support is not enabled. Set
-      <code>[skills] enabled = true</code> in your config to turn
-      it on; once a SKILL.md is discovered it will appear here for
-      enable/disable toggling.
-    </p>
+    <div class="text-center py-8 text-xs text-slate-500">
+      No skills discovered under the configured skills directory.
+    </div>
     {{end}}
+  {{else}}
+  <div class="text-center py-8 text-xs text-slate-400">
+    Skills support is not enabled. Set <code>[skills] enabled = true</code> to turn it on.
   </div>
+  {{end}}
 </div>

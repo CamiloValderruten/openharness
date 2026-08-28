@@ -590,6 +590,9 @@ func main() {
 		if skillStore != nil {
 			adminSrv.AttachSkills(skillStore)
 		}
+		if memory != nil {
+			adminSrv.AttachMemory(memory)
+		}
 		// Self-update inspector: always wired when admin is on.
 		// The updater itself is harmless when [update] is
 		// disabled — Apply refuses, State() returns the cached

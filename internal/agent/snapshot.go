@@ -3,6 +3,8 @@ package agent
 import (
 	"sync"
 	"time"
+
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 // Phase is a coarse-grained label for what the agent loop is doing
@@ -174,6 +176,8 @@ type inspectorState struct {
 
 	pendingOperator int
 	activeSubagents int
+
+	messages []llm.Message
 }
 
 // newInspectorState constructs the per-Agent inspector state. Phase
@@ -314,3 +318,43 @@ func (a *Agent) recordError(err error) {
 	a.inspector.lastErrorAt = time.Now()
 	a.inspector.mu.Unlock()
 }
+
+// recordMessages updates the cached snapshot of conversation messages.
+func (a *Agent) recordMessages(msgs []llm.Message) {
+	if a.inspector == nil {
+		return
+	}
+	a.inspector.mu.Lock()
+	defer a.inspector.mu.Unlock()
+	cp := make([]llm.Message, len(msgs))
+	copy(cp, msgs)
+	a.inspector.messages = cp
+}
+
+// Messages returns an immutable snapshot of current conversation messages.
+func (a *Agent) Messages() []llm.Message {
+	if a == nil || a.inspector == nil {
+		return nil
+	}
+	a.inspector.mu.RLock()
+	defer a.inspector.mu.RUnlock()
+	if a.inspector.messages == nil {
+		return nil
+	}
+	cp := make([]llm.Message, len(a.inspector.messages))
+	copy(cp, a.inspector.messages)
+	return cp
+}
+
+// PushUserMessage enqueues an interactive user message from the Web UI into the agent inbox.
+func (a *Agent) PushUserMessage(text string) {
+	if a == nil || a.inbox == nil {
+		return
+	}
+	a.inbox.Push(Item{
+		Bucket: BucketHuman,
+		Source: SourceCollaborator,
+		Text:   text,
+	})
+}
+

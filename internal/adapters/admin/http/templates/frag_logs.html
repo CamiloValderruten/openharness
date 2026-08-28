@@ -1,8 +1,20 @@
-<div class="log-view" id="log-view-inner">{{if .Err}}<span class="lvl-error">[error] {{.Err}}</span>{{else}}{{if .Empty}}<span class="opacity-60">// no log entries yet for {{.Today}}</span>{{else}}{{range .Lines}}<span class="lvl-{{.Level}}">{{.Text}}</span>
-{{end}}{{end}}{{end}}</div>
+<div id="log-view-inner" class="flex flex-col gap-1 font-mono text-[11px]">
+  {{if .Err}}
+    <span class="lvl-error text-rose-400 font-semibold">[error] {{.Err}}</span>
+  {{else if .Empty}}
+    <span class="text-slate-500">// no log entries yet for {{.Today}}</span>
+  {{else}}
+    {{range .Lines}}
+      <div class="leading-relaxed hover:bg-white/[0.02] py-0.5 px-1 rounded flex items-start gap-2">
+        <span class="lvl-{{.Level}} text-slate-300 break-all">{{.Text}}</span>
+      </div>
+    {{end}}
+  {{end}}
+</div>
+
 <script>
 (function () {
-  var el = document.getElementById("log-view-inner");
+  var el = document.getElementById("log-stream");
   if (el) el.scrollTop = el.scrollHeight;
 })();
 </script>
