@@ -139,6 +139,12 @@ type AgentSnapshot struct {
 	// ActiveSubagents is the count of currently-running spawned
 	// children, observed at the most recent injection point.
 	ActiveSubagents int
+
+	// CurrentTool is the name of the tool currently being executed (if in PhaseExecutingTool).
+	CurrentTool string
+
+	// SleepUntil is the target wake time if CurrentTool is "sleep".
+	SleepUntil time.Time
 }
 
 // inspectorState carries everything the snapshot exposes, guarded by
@@ -176,6 +182,9 @@ type inspectorState struct {
 
 	pendingOperator int
 	activeSubagents int
+
+	currentTool string
+	sleepUntil  time.Time
 
 	messages []llm.Message
 }
@@ -224,7 +233,20 @@ func (a *Agent) Snapshot() AgentSnapshot {
 		LastErrorAt:              s.lastErrorAt,
 		PendingOperator:          s.pendingOperator,
 		ActiveSubagents:          s.activeSubagents,
+		CurrentTool:              s.currentTool,
+		SleepUntil:               s.sleepUntil,
 	}
+}
+
+// recordCurrentTool updates the active tool name and optional sleep deadline.
+func (a *Agent) recordCurrentTool(name string, sleepUntil time.Time) {
+	if a == nil || a.inspector == nil {
+		return
+	}
+	a.inspector.mu.Lock()
+	a.inspector.currentTool = name
+	a.inspector.sleepUntil = sleepUntil
+	a.inspector.mu.Unlock()
 }
 
 // setPhase records a phase transition. now() is taken inside the
@@ -237,6 +259,10 @@ func (a *Agent) setPhase(p Phase) {
 	a.inspector.mu.Lock()
 	a.inspector.phase = p
 	a.inspector.phaseSince = time.Now()
+	if p != PhaseExecutingTool {
+		a.inspector.currentTool = ""
+		a.inspector.sleepUntil = time.Time{}
+	}
 	a.inspector.mu.Unlock()
 }
 

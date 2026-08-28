@@ -2,7 +2,9 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
+	"time"
 
 	"github.com/CamiloValderruten/openharness/internal/llm"
 )
@@ -82,6 +84,18 @@ func (a *Agent) executeToolCalls(ctx context.Context, messages []llm.Message, to
 		if tc.Function.Name != "" {
 			name = tc.Function.Name
 		}
+
+		var sleepUntil time.Time
+		if name == "sleep" {
+			var sArgs struct {
+				Seconds int `json:"seconds"`
+			}
+			if err := json.Unmarshal([]byte(tc.Function.Arguments), &sArgs); err == nil && sArgs.Seconds > 0 {
+				sleepUntil = time.Now().Add(time.Duration(sArgs.Seconds) * time.Second)
+			}
+		}
+		a.recordCurrentTool(name, sleepUntil)
+
 		var result string
 		switch {
 		case scrubbed[tc.ID]:
@@ -94,6 +108,8 @@ func (a *Agent) executeToolCalls(ctx context.Context, messages []llm.Message, to
 		default:
 			result = a.tools.Execute(ctx, tc)
 		}
+		a.recordCurrentTool("", time.Time{})
+
 		if debt != nil && *debt && collaboratorSendSucceeded(name, result) {
 			*debt = false
 			a.logger.Info("collaborator delivery debt cleared", "tool", name)

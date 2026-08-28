@@ -163,6 +163,12 @@ h1, h2, h3, h4, h5, h6 {
   animation: pulse-glow 1s infinite;
 }
 
+.status-dot.sleeping {
+  background-color: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+  animation: pulse-glow 2s infinite;
+}
+
 @keyframes pulse-glow {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(1.15); }

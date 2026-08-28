@@ -105,6 +105,29 @@
       <div class="text-[11px]">Go {{.GoVersion}} &middot; uptime {{.Uptime}}</div>
     </footer>
 
+    <script>
+      // Live smooth countdown ticker for sleep timer (e.g. 3:01 ... 3:00 ... 2:59)
+      function updateLiveCountdowns() {
+        const now = Math.floor(Date.now() / 1000);
+        document.querySelectorAll('[data-countdown-until]').forEach(el => {
+          const until = parseInt(el.getAttribute('data-countdown-until'), 10);
+          if (!until || isNaN(until)) return;
+          const rem = Math.max(0, until - now);
+          const m = Math.floor(rem / 60);
+          const s = rem % 60;
+          const sStr = s < 10 ? '0' + s : s;
+          const prefix = el.getAttribute('data-prefix') || 'Sleeping for ';
+          const target = el.querySelector('.countdown-text') || el;
+          if (rem > 0) {
+            target.textContent = `${prefix}${m}:${sStr}...`;
+          } else {
+            target.textContent = 'Waking up...';
+          }
+        });
+      }
+      setInterval(updateLiveCountdowns, 1000);
+      document.addEventListener('DOMContentLoaded', updateLiveCountdowns);
+    </script>
   {{else}}
     <!-- Unauthenticated Layout (Login) -->
     <main class="flex-1 flex items-center justify-center p-4">

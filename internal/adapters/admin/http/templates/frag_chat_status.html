@@ -1,6 +1,6 @@
-<div class="status-pill">
+<div class="status-pill" {{if gt .CountdownUntil 0}}data-countdown-until="{{.CountdownUntil}}" data-prefix="Sleeping for "{{end}}>
   <span class="status-dot {{.Class}}"></span>
-  <span class="text-xs font-medium">{{.Label}}</span>
+  <span class="text-xs font-medium {{if eq .Class "sleeping"}}text-amber-300{{end}} countdown-text">{{.Label}}</span>
   {{if gt .Tokens 0}}
     <span class="text-[11px] text-slate-500 font-mono hidden md:inline">({{.Tokens}} tokens)</span>
   {{end}}

@@ -2,6 +2,7 @@ package adminhttp
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"strings"
@@ -40,10 +41,12 @@ type chatPageData struct {
 }
 
 type chatMessagesData struct {
-	Messages    []ChatViewItem
-	AgentActive bool
-	Phase       string
-	PhaseLabel  string
+	Messages       []ChatViewItem
+	AgentActive    bool
+	Phase          string
+	PhaseLabel     string
+	PhaseClass     string
+	CountdownUntil int64
 }
 
 func (s *Server) handleChatPage(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +62,7 @@ func (s *Server) handleChatPage(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleChatSend(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		http.Error(w, "invalid form", http.StatusBadRequest)
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
@@ -78,80 +81,99 @@ func (s *Server) handleChatSend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	items, active := s.getChatItems()
+	var phase, label, class string
+	var countdownUntil int64
+	if s.deps.Agent != nil {
+		phase, label, class, countdownUntil = formatPhaseInfo(s.deps.Agent.Snapshot())
+	}
 	data := chatMessagesData{
-		Messages:    items,
-		AgentActive: active,
+		Messages:       items,
+		AgentActive:    active,
+		Phase:          phase,
+		PhaseLabel:     label,
+		PhaseClass:     class,
+		CountdownUntil: countdownUntil,
 	}
 	s.renderFragment(w, "frag_chat_messages.html", data)
 }
 
 func (s *Server) handleFragChatMessages(w http.ResponseWriter, _ *http.Request) {
 	items, active := s.getChatItems()
-	phase := "idle"
-	label := "Online"
+	var phase, label, class string
+	var countdownUntil int64
 	if s.deps.Agent != nil {
-		snap := s.deps.Agent.Snapshot()
-		phase = string(snap.Phase)
-		switch snap.Phase {
-		case agent.PhaseGenerating:
-			label = "Thinking..."
-		case agent.PhaseExecutingTool:
-			label = "Executing Tool..."
-		case agent.PhaseCompacting:
-			label = "Compacting..."
-		}
+		phase, label, class, countdownUntil = formatPhaseInfo(s.deps.Agent.Snapshot())
 	}
 
 	data := chatMessagesData{
-		Messages:    items,
-		AgentActive: active,
-		Phase:       phase,
-		PhaseLabel:  label,
+		Messages:       items,
+		AgentActive:    active,
+		Phase:          phase,
+		PhaseLabel:     label,
+		PhaseClass:     class,
+		CountdownUntil: countdownUntil,
 	}
 	s.renderFragment(w, "frag_chat_messages.html", data)
 }
 
 func (s *Server) handleFragChatStatus(w http.ResponseWriter, _ *http.Request) {
-	phase := "idle"
-	label := "Online (Idle)"
-	class := "online"
+	var phase, label, class string
+	var countdownUntil int64
 	var tokens int
 
 	if s.deps.Agent != nil {
 		snap := s.deps.Agent.Snapshot()
 		tokens = snap.TokenEstimate
-		switch snap.Phase {
-		case agent.PhaseGenerating:
-			phase = "generating"
-			label = "Thinking..."
-			class = "generating"
-		case agent.PhaseExecutingTool:
-			phase = "tool"
-			label = "Executing Tool..."
-			class = "tool"
-		case agent.PhaseCompacting:
-			phase = "compacting"
-			label = "Compacting Context..."
-			class = "generating"
-		default:
-			phase = "idle"
-			label = "Online"
-			class = "online"
-		}
+		phase, label, class, countdownUntil = formatPhaseInfo(snap)
+	} else {
+		phase, label, class = "idle", "Online", "online"
 	}
 
 	data := struct {
-		Phase  string
-		Label  string
-		Class  string
-		Tokens int
+		Phase          string
+		Label          string
+		Class          string
+		Tokens         int
+		CountdownUntil int64
 	}{
-		Phase:  phase,
-		Label:  label,
-		Class:  class,
-		Tokens: tokens,
+		Phase:          phase,
+		Label:          label,
+		Class:          class,
+		Tokens:         tokens,
+		CountdownUntil: countdownUntil,
 	}
 	s.renderFragment(w, "frag_chat_status.html", data)
+}
+
+func formatPhaseInfo(snap agent.AgentSnapshot) (phase, label, class string, countdownUntil int64) {
+	phase = string(snap.Phase)
+	switch snap.Phase {
+	case agent.PhaseGenerating:
+		return "generating", "Thinking...", "generating", 0
+	case agent.PhaseExecutingTool:
+		if snap.CurrentTool == "sleep" && !snap.SleepUntil.IsZero() {
+			rem := time.Until(snap.SleepUntil)
+			if rem > 0 {
+				totalSec := int(rem.Seconds())
+				m := totalSec / 60
+				s := totalSec % 60
+				return "sleeping", fmt.Sprintf("Sleeping for %d:%02d...", m, s), "sleeping", snap.SleepUntil.Unix()
+			}
+			return "sleeping", "Waking up...", "sleeping", 0
+		}
+		if snap.CurrentTool != "" {
+			return "tool", fmt.Sprintf("Running %s...", snap.CurrentTool), "tool", 0
+		}
+		return "tool", "Executing Tool...", "tool", 0
+	case agent.PhaseCompacting:
+		return "compacting", "Compacting Context...", "generating", 0
+	case agent.PhaseSaving:
+		return "saving", "Saving State...", "generating", 0
+	case agent.PhaseStopped:
+		return "stopped", "Stopped", "offline", 0
+	default:
+		return "idle", "Online", "online", 0
+	}
 }
 
 // getChatItems aggregates raw LLM conversation messages into UI items.
