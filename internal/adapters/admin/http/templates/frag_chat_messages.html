@@ -124,9 +124,9 @@
 <!-- Live Agent Activity Indicator when Active -->
 {{if .AgentActive}}
   <div class="chat-assistant-row">
-    <div class="flex items-center gap-2 text-xs text-slate-400 py-1" {{if gt .CountdownUntil 0}}data-countdown-until="{{.CountdownUntil}}" data-prefix="Sleeping for "{{end}}>
+    <div class="flex items-center gap-2 text-xs text-slate-400 py-1">
       <span class="status-dot {{if .PhaseClass}}{{.PhaseClass}}{{else}}generating{{end}}"></span>
-      <span class="font-medium {{if eq .PhaseClass "sleeping"}}text-amber-300{{else}}text-indigo-400 animate-pulse{{end}} countdown-text">{{if .PhaseLabel}}{{.PhaseLabel}}{{else}}Working...{{end}}</span>
+      <span class="font-medium text-indigo-400 animate-pulse">{{if .PhaseLabel}}{{.PhaseLabel}}{{else}}Working...{{end}}</span>
     </div>
   </div>
 {{end}}

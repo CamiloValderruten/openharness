@@ -153,15 +153,8 @@ func formatPhaseInfo(snap agent.AgentSnapshot) (phase, label, class string, coun
 	case agent.PhaseGenerating:
 		return "generating", "Thinking...", "generating", 0
 	case agent.PhaseExecutingTool:
-		if snap.CurrentTool == "sleep" && !snap.SleepUntil.IsZero() {
-			rem := time.Until(snap.SleepUntil)
-			if rem > 0 {
-				totalSec := int(rem.Seconds())
-				m := totalSec / 60
-				s := totalSec % 60
-				return "sleeping", fmt.Sprintf("Sleeping for %d:%02d...", m, s), "sleeping", snap.SleepUntil.Unix()
-			}
-			return "sleeping", "Waking up...", "sleeping", 0
+		if snap.CurrentTool == "sleep" {
+			return "idle", "Ready", "online", 0
 		}
 		if snap.CurrentTool != "" {
 			return "tool", fmt.Sprintf("Running %s...", snap.CurrentTool), "tool", 0
@@ -174,7 +167,7 @@ func formatPhaseInfo(snap agent.AgentSnapshot) (phase, label, class string, coun
 	case agent.PhaseStopped:
 		return "stopped", "Stopped", "offline", 0
 	default:
-		return "idle", "Online", "online", 0
+		return "idle", "Ready", "online", 0
 	}
 }
 
@@ -186,7 +179,7 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 
 	rawMsgs := s.deps.Agent.Messages()
 	snap := s.deps.Agent.Snapshot()
-	active := snap.Phase == agent.PhaseGenerating || snap.Phase == agent.PhaseExecutingTool
+	active := snap.Phase == agent.PhaseGenerating || (snap.Phase == agent.PhaseExecutingTool && snap.CurrentTool != "sleep")
 
 	if len(rawMsgs) == 0 {
 		return nil, active
@@ -240,6 +233,9 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 
 			if len(m.ToolCalls) > 0 {
 				for _, tc := range m.ToolCalls {
+					if tc.Function.Name == "sleep" {
+						continue
+					}
 					if tc.Function.Name == "send_message" || tc.Function.Name == "send_rich_message" || tc.Function.Name == "send_voice_message" {
 						var sArgs struct {
 							Text       string `json:"text"`
