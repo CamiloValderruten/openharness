@@ -1366,7 +1366,7 @@ func (a *Agent) appendCollaboratorMessages(messages []llm.Message, pending []str
 		a.logger.Info("injecting collaborator message into conversation", "text", text)
 		messages = append(messages, llm.Message{
 			Role: llm.RoleUser,
-			Content: fmt.Sprintf("[Collaborator message - %s]\n\nYour collaborator says: %s\n\nReply via send_message (or send_rich_message / send_voice_message) — assistant text is not delivered. You may use tools first if you need them, then send the answer in one go. For work that will take a while, an optional short real acknowledgment (what they asked + what you will check) is fine, but not required. Do not sleep until you have sent a reply.",
+			Content: fmt.Sprintf("[Collaborator message (via Discord) - %s]\n\nYour collaborator says: %s\n\nReply via send_message (or send_rich_message / send_voice_message) so your response reaches Discord (assistant text is not delivered to Discord, though all direct assistant text you generate is shown to the human in the Web UI). You may use tools first if you need them, then send the answer in one go. For work that will take a while, an optional short real acknowledgment is fine, but not required. Do not sleep until you have sent a reply.",
 				time.Now().Format(time.RFC1123), text),
 		})
 	}
