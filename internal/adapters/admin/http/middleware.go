@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/CamiloValderruten/openharness/internal/adapters/auth/users"
@@ -55,6 +56,19 @@ func sessionFromContext(ctx context.Context) *users.Session {
 // touching the login page at all.
 func (s *Server) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if s.deps.AuthDisabled {
+			sess := &users.Session{
+				Token:     "admin-open-token",
+				Username:  "admin",
+				CSRFToken: "open-csrf",
+				Created:   time.Now(),
+				LastSeen:  time.Now(),
+			}
+			ctx := context.WithValue(r.Context(), ctxKeySession, sess)
+			next(w, r.WithContext(ctx))
+			return
+		}
+
 		sess := s.currentSession(r)
 		if sess == nil {
 			switch {
@@ -118,11 +132,6 @@ func isSafeMethod(m string) bool {
 func redirectToLogin(w http.ResponseWriter, r *http.Request) {
 	target := "/admin/login"
 	if r.URL.Path != "" && r.URL.Path != "/admin/login" {
-		// Best-effort: preserve the post-login destination so the
-		// operator lands where they tried to go after sign-in.
-		// safeNext rejects anything that isn't a pure absolute
-		// same-origin path; the open-redirect guard in
-		// handleLoginPost rechecks before consuming `next`.
 		target = "/admin/login?next=" + url.QueryEscape(safeNext(r.URL.Path))
 	}
 	http.Redirect(w, r, target, http.StatusSeeOther)
@@ -148,11 +157,13 @@ func htmxLoginTarget(r *http.Request) string {
 }
 
 // safeNext URL-escapes the path and rejects anything that isn't a
-// pure absolute path beginning with "/". Returns "/admin" as a safe
-// fallback otherwise.
+// pure absolute path beginning with "/". Never redirects to raw fragment endpoints.
 func safeNext(p string) string {
 	if len(p) == 0 || p[0] != '/' {
 		return "/admin"
+	}
+	if strings.HasPrefix(p, "/admin/fragments/") {
+		return "/chat"
 	}
 	// Disallow protocol-relative URLs ("//evil.example/...").
 	if len(p) >= 2 && p[1] == '/' {

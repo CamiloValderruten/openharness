@@ -27,6 +27,10 @@ type loginData struct {
 // cookie, so even pre-authentication forms cannot be cross-site
 // posted. On successful login the real session takes over.
 func (s *Server) handleLoginGet(w http.ResponseWriter, r *http.Request) {
+	if s.deps.AuthDisabled {
+		http.Redirect(w, r, "/chat", http.StatusSeeOther)
+		return
+	}
 	if sess := s.currentSession(r); sess != nil {
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
 		return

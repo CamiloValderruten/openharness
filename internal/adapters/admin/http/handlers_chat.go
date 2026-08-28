@@ -361,6 +361,7 @@ func extractThinking(raw string) (thinking string, isThinking bool, content stri
 
 // formatChatMarkdown converts basic markdown syntax (code blocks, bold, newlines, etc.) to safe HTML.
 func formatChatMarkdown(text string) string {
+	text = strings.TrimSpace(text)
 	if text == "" {
 		return ""
 	}
@@ -368,13 +369,23 @@ func formatChatMarkdown(text string) string {
 	// Escape basic HTML
 	escaped := template.HTMLEscapeString(text)
 
-	// Replace fenced code blocks
 	var result strings.Builder
 	lines := strings.Split(escaped, "\n")
 	inCodeBlock := false
+	var currentPara []string
+
+	flushPara := func() {
+		if len(currentPara) > 0 {
+			joined := strings.Join(currentPara, "<br>")
+			result.WriteString("<p>" + joined + "</p>")
+			currentPara = nil
+		}
+	}
 
 	for _, line := range lines {
-		if strings.HasPrefix(line, "```") {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "```") {
+			flushPara()
 			if !inCodeBlock {
 				inCodeBlock = true
 				result.WriteString("<pre><code>")
@@ -387,19 +398,22 @@ func formatChatMarkdown(text string) string {
 
 		if inCodeBlock {
 			result.WriteString(line + "\n")
-		} else {
-			// Inline code `...`
-			formattedLine := replaceInlineCode(line)
-			// Bold **...**
-			formattedLine = replaceBold(formattedLine)
-			if formattedLine == "" {
-				result.WriteString("<p></p>")
-			} else {
-				result.WriteString("<p>" + formattedLine + "</p>")
-			}
+			continue
 		}
+
+		if trimmed == "" {
+			flushPara()
+			continue
+		}
+
+		// Inline code `...`
+		formattedLine := replaceInlineCode(line)
+		// Bold **...**
+		formattedLine = replaceBold(formattedLine)
+		currentPara = append(currentPara, formattedLine)
 	}
 
+	flushPara()
 	if inCodeBlock {
 		result.WriteString("</code></pre>")
 	}

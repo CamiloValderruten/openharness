@@ -548,6 +548,11 @@ type AdminConfig struct {
 	// "./skills.toml".
 	SkillsFile string `toml:"skills_file"`
 
+	// AuthDisabled disables password authentication checks. When true,
+	// anyone accessing the Web UI is immediately authorized as admin
+	// without prompting for a username or password. Default true.
+	AuthDisabled bool `toml:"auth_disabled"`
+
 	// SessionTTL is the idle timeout for an admin session.
 	// Sessions older than this with no activity are evicted from
 	// the in-memory session store. Default 12h.
@@ -783,11 +788,12 @@ func Default() *Config {
 			RunTimeout:     duration(30 * time.Minute),
 		},
 		Admin: AdminConfig{
-			Enabled:    false,
-			Bind:       "127.0.0.1:8742",
-			UsersFile:  "./users.toml",
-			SkillsFile: "./skills.toml",
-			SessionTTL: duration(12 * time.Hour),
+			Enabled:      false,
+			Bind:         "127.0.0.1:8742",
+			UsersFile:    "./users.toml",
+			SkillsFile:   "./skills.toml",
+			AuthDisabled: true,
+			SessionTTL:   duration(12 * time.Hour),
 		},
 		Peers: PeersConfig{
 			Enabled:   false,

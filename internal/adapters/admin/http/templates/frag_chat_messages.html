@@ -16,9 +16,7 @@
     {{if eq .Role "user"}}
       <!-- User Message Row -->
       <div class="chat-user-row">
-        <div class="chat-user-bubble">
-          {{.Content}}
-        </div>
+        <div class="chat-user-bubble">{{.RawText}}</div>
       </div>
     {{else}}
       <!-- Assistant Response Row (Flat, unboxed, natural reading) -->

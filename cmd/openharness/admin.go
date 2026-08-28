@@ -99,6 +99,7 @@ func buildAdmin(ctx context.Context, cfg *config.Config, startedAt time.Time, lo
 		Bind:          cfg.Admin.Bind,
 		Users:         store,
 		Sessions:      sessions,
+		AuthDisabled:  cfg.Admin.AuthDisabled,
 		StartedAt:     startedAt,
 		Logger:        logger,
 		RequestLogger: requestLogger,

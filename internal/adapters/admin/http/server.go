@@ -40,6 +40,9 @@ type Deps struct {
 	// Sessions is the in-memory session store.
 	Sessions *users.SessionStore
 
+	// AuthDisabled bypasses password authentication, granting instant access as admin.
+	AuthDisabled bool
+
 	// StartedAt is the wall-clock time the agent process started.
 	StartedAt time.Time
 
