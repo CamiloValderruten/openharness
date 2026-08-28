@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 // Persister binds a file path and logger so the agent can call Save/Load

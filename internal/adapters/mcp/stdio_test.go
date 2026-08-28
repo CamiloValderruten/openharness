@@ -43,7 +43,7 @@ func TestStdioClientCallToolSendsToolsCallRequest(t *testing.T) {
 	)
 	defer client.Close()
 
-	result, err := client.CallTool(context.Background(), "local", "local_search", json.RawMessage(`{"query":"faultline"}`))
+	result, err := client.CallTool(context.Background(), "local", "local_search", json.RawMessage(`{"query":"openharness"}`))
 	if err != nil {
 		t.Fatalf("CallTool: %v", err)
 	}
@@ -290,7 +290,7 @@ func (r *scriptedStdioRunner) Start(ctx context.Context, cmd StdioCommand) (Stdi
 					proc.done <- err
 					return
 				}
-				if params.Name != "local_search" || string(params.Arguments) != `{"query":"faultline"}` {
+				if params.Name != "local_search" || string(params.Arguments) != `{"query":"openharness"}` {
 					proc.done <- &unexpectedMethodError{method: req.Method}
 					return
 				}
@@ -513,7 +513,7 @@ func TestStdioMCPHelperProcess(t *testing.T) {
 			if params.Name != "local_search" {
 				t.Fatalf("name = %q, want local_search", params.Name)
 			}
-			if string(params.Arguments) != `{"query":"faultline"}` {
+			if string(params.Arguments) != `{"query":"openharness"}` {
 				t.Fatalf("arguments = %s, want original arguments", params.Arguments)
 			}
 			_, _ = os.Stdout.WriteString(`{"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"local results"}]}}` + "\n")

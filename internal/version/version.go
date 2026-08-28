@@ -1,7 +1,7 @@
 // Package version exposes build-time metadata about the running binary.
 //
 // During release builds, goreleaser injects values via -X ldflags. For
-// non-release local builds (`go build ./cmd/faultline`) the defaults
+// non-release local builds (`go build ./cmd/openharness`) the defaults
 // below are used, which is enough to identify a development binary
 // without requiring any extra build flags.
 package version

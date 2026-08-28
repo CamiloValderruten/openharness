@@ -6,8 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/CamiloValderruten/faultline/internal/config"
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 func TestCollaboratorSendSucceeded(t *testing.T) {

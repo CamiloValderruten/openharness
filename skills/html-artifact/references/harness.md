@@ -1,6 +1,6 @@
 # HTML publishing harness (skill reference)
 
-Canonical human docs live in the Faultline repo:
+Canonical human docs live in the OpenHarness repo:
 
 - `docs/harness/html-publishing.md` — layout, formats, security, CF tunnel notes
 - `docs/harness/html-template.html` — full-page starter (also bundled here as `assets/template.html`)

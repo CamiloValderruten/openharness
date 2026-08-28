@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"time"
 
-	openaiembed "github.com/CamiloValderruten/faultline/internal/adapters/embeddings/openai"
-	"github.com/CamiloValderruten/faultline/internal/adapters/memory/fs"
-	"github.com/CamiloValderruten/faultline/internal/config"
-	"github.com/CamiloValderruten/faultline/internal/search/vector"
-	"github.com/CamiloValderruten/faultline/internal/tools"
+	openaiembed "github.com/CamiloValderruten/openharness/internal/adapters/embeddings/openai"
+	"github.com/CamiloValderruten/openharness/internal/adapters/memory/fs"
+	"github.com/CamiloValderruten/openharness/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/search/vector"
+	"github.com/CamiloValderruten/openharness/internal/tools"
 )
 
 // vectorPersistInterval is how often the persistence loop checks the

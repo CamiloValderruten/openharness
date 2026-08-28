@@ -1,4 +1,4 @@
-module github.com/CamiloValderruten/faultline
+module github.com/CamiloValderruten/openharness
 
 go 1.26.1
 
@@ -52,7 +52,7 @@ require (
 )
 
 // Discord enforces DAVE/E2EE on voice (close 4017). Upstream discordgo lacks
-// it; we vendor yeongaori's DAVE fork with Faultline patches for the
+// it; we vendor yeongaori's DAVE fork with OpenHarness patches for the
 // WaitForDAVEReady session-pointer race, VOICE_SERVER_UPDATE coalesce, and
-// close-4006 handling. See third_party/discordgo/FAULTLINE.md.
+// close-4006 handling. See third_party/discordgo/OPENHARNESS.md.
 replace github.com/bwmarrin/discordgo => ./third_party/discordgo

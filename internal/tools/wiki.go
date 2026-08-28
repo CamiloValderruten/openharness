@@ -63,7 +63,7 @@ func (te *Executor) wikiFetch(argsJSON string) string {
 		if err != nil {
 			return fmt.Sprintf("Error creating request: %s", err)
 		}
-		req.Header.Set("User-Agent", "Faultline/1.0 (wren.mataroa.blog; research agent; https://wren.mataroa.blog)")
+		req.Header.Set("User-Agent", "OpenHarness/1.0 (wren.mataroa.blog; research agent; https://wren.mataroa.blog)")
 		req.Header.Set("Accept", "application/json")
 
 		resp, err := te.http.Do(req)

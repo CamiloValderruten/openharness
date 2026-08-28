@@ -9,16 +9,16 @@
 # Local check:      goreleaser check
 version: 2
 
-project_name: faultline
+project_name: openharness
 
 before:
   hooks:
     - go mod tidy
 
 builds:
-  - id: faultline
-    main: ./cmd/faultline
-    binary: faultline
+  - id: openharness
+    main: ./cmd/openharness
+    binary: openharness
     env:
       - CGO_ENABLED=0
     goos:
@@ -35,9 +35,9 @@ builds:
       - -trimpath
     ldflags:
       - -s -w
-      - -X github.com/CamiloValderruten/faultline/internal/version.Version={{ .Version }}
-      - -X github.com/CamiloValderruten/faultline/internal/version.Commit={{ .ShortCommit }}
-      - -X github.com/CamiloValderruten/faultline/internal/version.BuildTime={{ .Date }}
+      - -X github.com/CamiloValderruten/openharness/internal/version.Version={{ .Version }}
+      - -X github.com/CamiloValderruten/openharness/internal/version.Commit={{ .ShortCommit }}
+      - -X github.com/CamiloValderruten/openharness/internal/version.BuildTime={{ .Date }}
 
 archives:
   - id: default
@@ -71,6 +71,6 @@ release:
   # created for this tag, rather than creating a new release.
   mode: append
   # Mark anything tagged with -alpha / -beta / -rc as a prerelease so
-  # the self-update logic in cmd/faultline can skip it unless explicitly
+  # the self-update logic in cmd/openharness can skip it unless explicitly
   # opted in.
   prerelease: auto

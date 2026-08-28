@@ -1,8 +1,8 @@
 services:
   coco:
     build: .
-    image: faultline:latest
-    container_name: faultline-coco
+    image: openharness:latest
+    container_name: openharness-coco
     user: "${PUID:-1000}:${PGID:-1003}"
     command: ["-config", "/config/config.toml"]
     stop_grace_period: 3m
@@ -14,17 +14,17 @@ services:
       # HTML publishing harness — Cloudflare Tunnel via host.docker.internal
       - "8751:8751"
     volumes:
-      - /home/camilovalderruten/faultline/coco.config.toml:/config/config.toml:ro
-      - /home/camilovalderruten/.faultline/agents/coco:/agent:rw
-      - /home/camilovalderruten/.faultline/shared/memory:/agent/memory/shared:rw
+      - /home/camilovalderruten/openharness/coco.config.toml:/config/config.toml:ro
+      - /home/camilovalderruten/.openharness/agents/coco:/agent:rw
+      - /home/camilovalderruten/.openharness/shared/memory:/agent/memory/shared:rw
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/camilovalderruten/.faultline/agents/coco/sandbox:/home/camilovalderruten/.faultline/agents/coco/sandbox:rw
+      - /home/camilovalderruten/.openharness/agents/coco/sandbox:/home/camilovalderruten/.openharness/agents/coco/sandbox:rw
     restart: unless-stopped
 
   arlo:
     build: .
-    image: faultline:latest
-    container_name: faultline-arlo
+    image: openharness:latest
+    container_name: openharness-arlo
     user: "${PUID:-1000}:${PGID:-1003}"
     command: ["-config", "/config/config.toml"]
     stop_grace_period: 3m
@@ -38,9 +38,9 @@ services:
       # Authenticated inbox webhook — loopback only (HA / n8n / Shortcuts)
       - "127.0.0.1:8760:8760"
     volumes:
-      - /home/camilovalderruten/faultline/arlo.config.toml:/config/config.toml:ro
-      - /home/camilovalderruten/.faultline/agents/arlo:/agent:rw
-      - /home/camilovalderruten/.faultline/shared/memory:/agent/memory/shared:rw
-      - /home/camilovalderruten/.faultline/agents/arlo/sandbox:/home/camilovalderruten/.faultline/agents/arlo/sandbox:rw
+      - /home/camilovalderruten/openharness/arlo.config.toml:/config/config.toml:ro
+      - /home/camilovalderruten/.openharness/agents/arlo:/agent:rw
+      - /home/camilovalderruten/.openharness/shared/memory:/agent/memory/shared:rw
+      - /home/camilovalderruten/.openharness/agents/arlo/sandbox:/home/camilovalderruten/.openharness/agents/arlo/sandbox:rw
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped

@@ -370,7 +370,7 @@ func (s *stdioSession) initialize() error {
 		JSONRPC: "2.0",
 		ID:      1,
 		Method:  "initialize",
-		Params:  json.RawMessage(`{"protocolVersion":"` + defaultProtocolVersion + `","capabilities":{},"clientInfo":{"name":"faultline","version":"dev"}}`),
+		Params:  json.RawMessage(`{"protocolVersion":"` + defaultProtocolVersion + `","capabilities":{},"clientInfo":{"name":"openharness","version":"dev"}}`),
 	}); err != nil {
 		return err
 	}

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/webhook"
-	"github.com/CamiloValderruten/faultline/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/adapters/webhook"
+	"github.com/CamiloValderruten/openharness/internal/config"
 )
 
 func buildWebhook(cfg config.WebhookConfig, push webhook.PushFunc, logger *slog.Logger) (*webhook.Server, error) {

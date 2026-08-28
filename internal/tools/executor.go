@@ -17,22 +17,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/email/imap"
-	"github.com/CamiloValderruten/faultline/internal/adapters/llm/kobold"
-	"github.com/CamiloValderruten/faultline/internal/adapters/mcp"
-	"github.com/CamiloValderruten/faultline/internal/adapters/memory/fs"
-	"github.com/CamiloValderruten/faultline/internal/adapters/sandbox/docker"
-	skillsfs "github.com/CamiloValderruten/faultline/internal/adapters/skills/fs"
-	"github.com/CamiloValderruten/faultline/internal/config"
-	"github.com/CamiloValderruten/faultline/internal/llm"
-	"github.com/CamiloValderruten/faultline/internal/messaging"
-	"github.com/CamiloValderruten/faultline/internal/peer"
-	"github.com/CamiloValderruten/faultline/internal/schedule"
-	"github.com/CamiloValderruten/faultline/internal/search/bm25"
-	"github.com/CamiloValderruten/faultline/internal/search/vector"
-	"github.com/CamiloValderruten/faultline/internal/subagent"
-	"github.com/CamiloValderruten/faultline/internal/update"
-	"github.com/CamiloValderruten/faultline/internal/version"
+	"github.com/CamiloValderruten/openharness/internal/adapters/email/imap"
+	"github.com/CamiloValderruten/openharness/internal/adapters/llm/kobold"
+	"github.com/CamiloValderruten/openharness/internal/adapters/mcp"
+	"github.com/CamiloValderruten/openharness/internal/adapters/memory/fs"
+	"github.com/CamiloValderruten/openharness/internal/adapters/sandbox/docker"
+	skillsfs "github.com/CamiloValderruten/openharness/internal/adapters/skills/fs"
+	"github.com/CamiloValderruten/openharness/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/messaging"
+	"github.com/CamiloValderruten/openharness/internal/peer"
+	"github.com/CamiloValderruten/openharness/internal/schedule"
+	"github.com/CamiloValderruten/openharness/internal/search/bm25"
+	"github.com/CamiloValderruten/openharness/internal/search/vector"
+	"github.com/CamiloValderruten/openharness/internal/subagent"
+	"github.com/CamiloValderruten/openharness/internal/update"
+	"github.com/CamiloValderruten/openharness/internal/version"
 )
 
 // memoryPathSegment defines the allowed shape of a single path segment
@@ -562,7 +562,7 @@ func (te *Executor) buildAllToolDefs() []llm.Tool {
 				Type: llm.ToolTypeFunction,
 				Function: &llm.FunctionDef{
 					Name:        "update_check",
-					Description: "Check GitHub releases for a newer version of faultline. Does NOT apply anything; just polls. Returns the current version, the latest released version, whether an update is available, and the time of the check.",
+					Description: "Check GitHub releases for a newer version of openharness. Does NOT apply anything; just polls. Returns the current version, the latest released version, whether an update is available, and the time of the check.",
 					Parameters: map[string]interface{}{
 						"type":       "object",
 						"properties": map[string]interface{}{},
@@ -1444,7 +1444,7 @@ type Deps struct {
 	SubagentManager *subagent.Manager
 
 	// SubagentReportFn is set on child Executors by the spawnFn
-	// closure in cmd/faultline/main.go. When non-nil, the
+	// closure in cmd/openharness/main.go. When non-nil, the
 	// subagent_report tool is advertised; calling it invokes this
 	// callback with the report text. The callback is responsible
 	// for stashing the text and signaling the child agent loop

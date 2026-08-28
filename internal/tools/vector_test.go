@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/CamiloValderruten/faultline/internal/search/vector"
+	"github.com/CamiloValderruten/openharness/internal/search/vector"
 )
 
 // fakeEmbedder is a deterministic Embedder for tests. It records

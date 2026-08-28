@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/CamiloValderruten/faultline/internal/messaging"
+	"github.com/CamiloValderruten/openharness/internal/messaging"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 

@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 // fakeKobold returns an httptest.Server that mimics the subset of KoboldCpp

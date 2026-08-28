@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/config"
-	"github.com/CamiloValderruten/faultline/internal/llm"
-	"github.com/CamiloValderruten/faultline/internal/schedule"
-	"github.com/CamiloValderruten/faultline/internal/subagent"
+	"github.com/CamiloValderruten/openharness/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/schedule"
+	"github.com/CamiloValderruten/openharness/internal/subagent"
 )
 
 func TestAppendScheduledTasksLabelsTaskAsSelfCreated(t *testing.T) {

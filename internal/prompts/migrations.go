@@ -57,7 +57,7 @@ const migrationsLogHeader = `# Prompt migrations applied
 
 This file records which prompt migrations have been applied to this
 deployment. Migrations are one-time instructions shipped with a
-faultline release that update the agent's mutable prompt files in
+openharness release that update the agent's mutable prompt files in
 place. The agent applies each migration once and the runtime records
 the application here.
 

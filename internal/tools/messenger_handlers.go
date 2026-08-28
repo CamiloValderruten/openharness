@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/messaging"
+	"github.com/CamiloValderruten/openharness/internal/messaging"
 )
 
 // voiceSender is optionally implemented by the Discord messenger when Deepgram

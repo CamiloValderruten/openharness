@@ -8,7 +8,7 @@ import (
 
 func TestAssetName_MatchesGoreleaserConvention(t *testing.T) {
 	got := AssetName("1.2.3")
-	if !strings.HasPrefix(got, "faultline_1.2.3_") {
+	if !strings.HasPrefix(got, "openharness_1.2.3_") {
 		t.Errorf("missing version prefix in %q", got)
 	}
 	if !strings.HasSuffix(got, ".tar.gz") {

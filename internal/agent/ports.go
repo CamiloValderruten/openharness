@@ -4,14 +4,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/llm/kobold"
-	"github.com/CamiloValderruten/faultline/internal/daemon"
-	"github.com/CamiloValderruten/faultline/internal/llm"
-	"github.com/CamiloValderruten/faultline/internal/peer"
-	"github.com/CamiloValderruten/faultline/internal/schedule"
-	"github.com/CamiloValderruten/faultline/internal/search/bm25"
-	"github.com/CamiloValderruten/faultline/internal/skills"
-	"github.com/CamiloValderruten/faultline/internal/subagent"
+	"github.com/CamiloValderruten/openharness/internal/adapters/llm/kobold"
+	"github.com/CamiloValderruten/openharness/internal/daemon"
+	"github.com/CamiloValderruten/openharness/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/peer"
+	"github.com/CamiloValderruten/openharness/internal/schedule"
+	"github.com/CamiloValderruten/openharness/internal/search/bm25"
+	"github.com/CamiloValderruten/openharness/internal/skills"
+	"github.com/CamiloValderruten/openharness/internal/subagent"
 )
 
 // ChatModel is the LLM port. The agent does not care which backend

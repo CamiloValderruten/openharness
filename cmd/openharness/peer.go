@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/CamiloValderruten/faultline/internal/config"
-	"github.com/CamiloValderruten/faultline/internal/peer"
+	"github.com/CamiloValderruten/openharness/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/peer"
 )
 
 func buildPeerMailbox(cfg config.PeersConfig, logger *slog.Logger) (*peer.Mailbox, *peer.Server, error) {

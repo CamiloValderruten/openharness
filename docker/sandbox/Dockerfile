@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1.6
 
-# Faultline agent sandbox image.
+# OpenHarness agent sandbox image.
 #
-# Multi-runtime execution environment for the Faultline agent's sandbox
+# Multi-runtime execution environment for the OpenHarness agent's sandbox
 # tools. The Go side talks to this image purely through:
 #
 #   - sh / bash on PATH
@@ -20,12 +20,12 @@
 #
 # Base is Debian bookworm because it publishes both amd64 and arm64 images.
 # Reproducibility comes from pinning the *published* image
-# (ghcr.io/camilovalderruten/faultline-sandbox:vX.Y.Z), not from pinning every package.
+# (ghcr.io/camilovalderruten/openharness-sandbox:vX.Y.Z), not from pinning every package.
 
 FROM debian:bookworm-slim
 
-LABEL org.opencontainers.image.source="https://github.com/CamiloValderruten/faultline"
-LABEL org.opencontainers.image.description="Faultline agent sandbox: multi-runtime execution environment (Python/uv, Node, Bun, Deno, Go) on Debian"
+LABEL org.opencontainers.image.source="https://github.com/CamiloValderruten/openharness"
+LABEL org.opencontainers.image.description="OpenHarness agent sandbox: multi-runtime execution environment (Python/uv, Node, Bun, Deno, Go) on Debian"
 LABEL org.opencontainers.image.licenses="MIT"
 
 # pipefail so a failure in any stage of `curl ... | sh` aborts the build.
@@ -80,7 +80,7 @@ RUN apt-get update \
 # ---------------------------------------------------------------------------
 # GitHub CLI (gh) via the official apt repository.
 #
-# gh reads GH_TOKEN from the environment (injected by Faultline via
+# gh reads GH_TOKEN from the environment (injected by OpenHarness via
 # [sandbox.env]); with network enabled the agent can use gh for API /
 # repo operations, and `gh auth setup-git` wires git HTTPS to the same
 # token via the credential helper under HOME=/cache/home.
@@ -133,7 +133,7 @@ RUN curl -fsSL https://bun.sh/install | bash \
 #
 # These match the -e flags the Go side passes on every `docker run`. Baking
 # them in lets ad-hoc invocations (e.g. operator debugging via
-# `docker run --rm -it ghcr.io/camilovalderruten/faultline-sandbox`) behave the same
+# `docker run --rm -it ghcr.io/camilovalderruten/openharness-sandbox`) behave the same
 # as the agent's invocations. uv honours UV_PROJECT_ENVIRONMENT and
 # UV_CACHE_DIR whenever a project root is on the working directory.
 # ---------------------------------------------------------------------------
@@ -155,7 +155,7 @@ ENV UV_CACHE_DIR=/cache \
 #
 # UID 65532 is the conventional "nonroot" UID (used by Distroless and
 # others). Far from typical host UIDs (0-1999) so collisions with any
-# operator running faultline as their normal account are unlikely. The
+# operator running openharness as their normal account are unlikely. The
 # user has no shell and a nonexistent home dir on purpose -- there is
 # no scenario where the sandbox should be able to log in or persist
 # state.

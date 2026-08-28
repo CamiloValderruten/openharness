@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/mcp"
-	"github.com/CamiloValderruten/faultline/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/adapters/mcp"
+	"github.com/CamiloValderruten/openharness/internal/config"
 )
 
 var oauthCallbackPageTemplate = template.Must(template.New("oauth-callback").Parse(`<!doctype html>
@@ -18,7 +18,7 @@ var oauthCallbackPageTemplate = template.Must(template.New("oauth-callback").Par
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{{.Title}} :: faultline</title>
+  <title>{{.Title}} :: openharness</title>
 </head>
 <body>
   <main>

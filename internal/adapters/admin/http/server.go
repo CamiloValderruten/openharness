@@ -1,5 +1,5 @@
 // Package adminhttp implements the embedded HTTP admin UI driving
-// adapter for Faultline. It listens on a loopback address (no TLS;
+// adapter for OpenHarness. It listens on a loopback address (no TLS;
 // reverse-proxy TLS termination is the documented path) and serves
 // an HTMX + DaisyUI front-end backed by html/template rendering.
 //
@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/auth/users"
+	"github.com/CamiloValderruten/openharness/internal/adapters/auth/users"
 )
 
 // Deps bundles the dependencies the composition root injects.

@@ -23,7 +23,7 @@ func TestInitCreatesNodePackageManifest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read node/package.json: %v", err)
 	}
-	for _, want := range []string{`"name": "faultline-node-sandbox"`, `"private": true`} {
+	for _, want := range []string{`"name": "openharness-node-sandbox"`, `"private": true`} {
 		if !strings.Contains(string(data), want) {
 			t.Fatalf("package.json missing %q:\n%s", want, data)
 		}
@@ -32,18 +32,18 @@ func TestInitCreatesNodePackageManifest(t *testing.T) {
 
 func TestDockerArgsMountNodeEnvironment(t *testing.T) {
 	s := &Sandbox{
-		dir:         "/tmp/faultline/sandbox",
-		image:       "faultline-sandbox",
+		dir:         "/tmp/openharness/sandbox",
+		image:       "openharness-sandbox",
 		memoryLimit: "128m",
 		uid:         1000,
 		gid:         1000,
 	}
 
-	args := s.dockerArgs(false, "faultline-sandbox-test")
+	args := s.dockerArgs(false, "openharness-sandbox-test")
 	joined := strings.Join(args, "\x00")
 	for _, want := range []string{
-		"-v\x00/tmp/faultline/sandbox/node:/node:rw",
-		"-v\x00/tmp/faultline/sandbox/mcp:/mcp:rw",
+		"-v\x00/tmp/openharness/sandbox/node:/node:rw",
+		"-v\x00/tmp/openharness/sandbox/mcp:/mcp:rw",
 		"-e\x00PATH=/node/node_modules/.bin:/usr/local/bin:/usr/bin:/bin",
 	} {
 		if !strings.Contains(joined, want) {
@@ -54,15 +54,15 @@ func TestDockerArgsMountNodeEnvironment(t *testing.T) {
 
 func TestDockerArgsInjectsSandboxEnv(t *testing.T) {
 	s := &Sandbox{
-		dir:         "/tmp/faultline/sandbox",
-		image:       "faultline-sandbox",
+		dir:         "/tmp/openharness/sandbox",
+		image:       "openharness-sandbox",
 		memoryLimit: "128m",
 		uid:         1000,
 		gid:         1000,
 		env:         map[string]string{"GH_TOKEN": "ghp_secret", "Z_LAST": "1"},
 	}
 
-	args := s.dockerArgs(false, "faultline-sandbox-test")
+	args := s.dockerArgs(false, "openharness-sandbox-test")
 	joined := strings.Join(args, "\x00")
 	for _, want := range []string{
 		"-e\x00GH_TOKEN=ghp_secret",
@@ -80,15 +80,15 @@ func TestDockerArgsInjectsSandboxEnv(t *testing.T) {
 
 func TestMCPStdioArgsInjectsSandboxEnvThenCallerEnv(t *testing.T) {
 	s := &Sandbox{
-		dir:         "/tmp/faultline/sandbox",
-		image:       "faultline-sandbox",
+		dir:         "/tmp/openharness/sandbox",
+		image:       "openharness-sandbox",
 		memoryLimit: "128m",
 		uid:         1000,
 		gid:         1000,
 		env:         map[string]string{"GH_TOKEN": "from-sandbox"},
 	}
 
-	args := s.mcpStdioArgs("faultline-mcp-test", "/mcp/x", map[string]string{
+	args := s.mcpStdioArgs("openharness-mcp-test", "/mcp/x", map[string]string{
 		"GH_TOKEN": "from-server",
 		"FOO":      "bar",
 	}, "npx", nil)
@@ -126,14 +126,14 @@ func TestRedactDockerArgsMasksEnvValues(t *testing.T) {
 
 func TestMCPStdioArgsExposeNodeEnvironment(t *testing.T) {
 	s := &Sandbox{
-		dir:         "/tmp/faultline/sandbox",
-		image:       "faultline-sandbox",
+		dir:         "/tmp/openharness/sandbox",
+		image:       "openharness-sandbox",
 		memoryLimit: "128m",
 		uid:         1000,
 		gid:         1000,
 	}
 
-	args := s.mcpStdioArgs("faultline-mcp-test", "/mcp/playwright", nil, "playwright-mcp", nil)
+	args := s.mcpStdioArgs("openharness-mcp-test", "/mcp/playwright", nil, "playwright-mcp", nil)
 	joined := strings.Join(args, "\x00")
 	if !strings.Contains(joined, "-e\x00PATH=/node/node_modules/.bin:/usr/local/bin:/usr/bin:/bin") {
 		t.Fatalf("mcp stdio args missing node PATH in %v", args)

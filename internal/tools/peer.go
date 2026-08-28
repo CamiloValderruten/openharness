@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 func (te *Executor) peerToolDefs() []llm.Tool {
@@ -23,7 +23,7 @@ func (te *Executor) peerToolDefs() []llm.Tool {
 			Type: llm.ToolTypeFunction,
 			Function: &llm.FunctionDef{
 				Name: "peer_send",
-				Description: "Send a message to another Faultline agent. The message lands in their pull-only inbox — they will not see it until they call peer_inbox/peer_read. " +
+				Description: "Send a message to another OpenHarness agent. The message lands in their pull-only inbox — they will not see it until they call peer_inbox/peer_read. " +
 					"Known peers: " + peerList + ".",
 				Parameters: map[string]interface{}{
 					"type": "object",
@@ -45,7 +45,7 @@ func (te *Executor) peerToolDefs() []llm.Tool {
 			Type: llm.ToolTypeFunction,
 			Function: &llm.FunctionDef{
 				Name:        "peer_inbox",
-				Description: "List unread messages from other Faultline agents. Does not mark them read. Pull-only: nothing arrives in conversation until you call this (or peer_read).",
+				Description: "List unread messages from other OpenHarness agents. Does not mark them read. Pull-only: nothing arrives in conversation until you call this (or peer_read).",
 				Parameters: map[string]interface{}{
 					"type":       "object",
 					"properties": map[string]interface{}{},

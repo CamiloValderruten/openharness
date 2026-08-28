@@ -1,4 +1,4 @@
-# Build the faultline binary
+# Build the openharness binary
 FROM golang:1.26 AS builder
 ARG TARGETOS
 ARG TARGETARCH
@@ -17,10 +17,10 @@ ARG VERSION=dev
 ARG COMMIT
 RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} \
     go build -a -ldflags="-s -w \
-      -X github.com/CamiloValderruten/faultline/internal/version.Version=${VERSION} \
-      -X github.com/CamiloValderruten/faultline/internal/version.Commit=${COMMIT:-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)} \
-      -X github.com/CamiloValderruten/faultline/internal/version.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    -o faultline ./cmd/faultline
+      -X github.com/CamiloValderruten/openharness/internal/version.Version=${VERSION} \
+      -X github.com/CamiloValderruten/openharness/internal/version.Commit=${COMMIT:-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)} \
+      -X github.com/CamiloValderruten/openharness/internal/version.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    -o openharness ./cmd/openharness
 
 # Bundle CA certificates for the final distroless image
 RUN mkdir -p /workspace/certs && cp /etc/ssl/certs/ca-certificates.crt /workspace/certs/ca-certificates.crt
@@ -35,18 +35,18 @@ RUN mkdir -p /workspace/certs && cp /etc/ssl/certs/ca-certificates.crt /workspac
 #
 # Verify locally (client must print; server needs socket + permission to read
 # the socket, e.g. match container user to host docker group or root):
-#   docker build -t faultline:dev .
+#   docker build -t openharness:dev .
 #   docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-#     --entrypoint /usr/local/bin/docker faultline:dev version
+#     --entrypoint /usr/local/bin/docker openharness:dev version
 FROM docker:27-cli AS docker-cli
 
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /
-COPY --from=builder /workspace/faultline /faultline
+COPY --from=builder /workspace/openharness /openharness
 COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=builder /workspace/certs/ /etc/ssl/certs/
 # Same PATH as distroless static; explicit so `docker` resolves via
 # exec.LookPath("docker") regardless of base-image defaults.
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 USER nonroot:nonroot
-ENTRYPOINT ["/faultline"]
+ENTRYPOINT ["/openharness"]

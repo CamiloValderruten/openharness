@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/CamiloValderruten/faultline/internal/skills"
+	"github.com/CamiloValderruten/openharness/internal/skills"
 )
 
 // stateFileShape is the on-disk shape of skills.toml. Kept simple:
@@ -156,7 +156,7 @@ func writeSkillsStateFile(path string, disabled []string) error {
 	}()
 
 	var b strings.Builder
-	b.WriteString("# Faultline skills enable/disable state.\n")
+	b.WriteString("# OpenHarness skills enable/disable state.\n")
 	b.WriteString("#\n")
 	b.WriteString("# Edited via the admin UI's Skills page; safe to inspect by hand\n")
 	b.WriteString("# but the file may be rewritten on any toggle. Skills listed in\n")

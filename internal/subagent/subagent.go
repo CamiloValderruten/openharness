@@ -16,7 +16,7 @@
 // agent drains alongside operator messages.
 //
 // Construction of the actual child agent.Agent + tools.Executor +
-// llm.Chat client happens in cmd/faultline/main.go via a SpawnFunc
+// llm.Chat client happens in cmd/openharness/main.go via a SpawnFunc
 // closure; this package never imports the agent or tools packages.
 package subagent
 

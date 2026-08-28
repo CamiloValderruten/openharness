@@ -6,14 +6,14 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/auth/users"
+	"github.com/CamiloValderruten/openharness/internal/adapters/auth/users"
 )
 
 const (
 	// sessionCookieName is the cookie name carrying the session
 	// token. Prefixed with "__Host-" would be ideal but requires
 	// HTTPS, which we deliberately don't terminate ourselves.
-	sessionCookieName = "faultline_session"
+	sessionCookieName = "openharness_session"
 
 	// csrfFormField is the form/multipart name we look up for the
 	// CSRF token on every state-changing request.

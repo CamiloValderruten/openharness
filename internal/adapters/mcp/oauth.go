@@ -450,7 +450,7 @@ func (m *OAuthManager) getProtectedResourceMetadata(ctx context.Context, metadat
 }
 
 func (m *OAuthManager) resourceMetadataFromChallenge(ctx context.Context, server ServerConfig) (string, error) {
-	body := `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"faultline","version":"dev"}}}`
+	body := `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"openharness","version":"dev"}}}`
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, server.URL, strings.NewReader(body))
 	if err != nil {
 		return "", err
@@ -557,7 +557,7 @@ func (m *OAuthManager) clientRegistration(ctx context.Context, server ServerConf
 
 func (m *OAuthManager) dynamicClientRegistration(ctx context.Context, registrationURL string, scopes []string) (oauthClientRegistration, error) {
 	body := map[string]interface{}{
-		"client_name":                "Faultline",
+		"client_name":                "OpenHarness",
 		"redirect_uris":              []string{m.redirectURI()},
 		"grant_types":                []string{"authorization_code", "refresh_token"},
 		"response_types":             []string{"code"},

@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/search/bm25"
-	"github.com/CamiloValderruten/faultline/internal/skills"
-	"github.com/CamiloValderruten/faultline/internal/subagent"
+	"github.com/CamiloValderruten/openharness/internal/search/bm25"
+	"github.com/CamiloValderruten/openharness/internal/skills"
+	"github.com/CamiloValderruten/openharness/internal/subagent"
 )
 
 // Embedded default prompt contents, compiled into the binary from templates/.

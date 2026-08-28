@@ -12,9 +12,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/sandbox/docker"
-	skillsfs "github.com/CamiloValderruten/faultline/internal/adapters/skills/fs"
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/adapters/sandbox/docker"
+	skillsfs "github.com/CamiloValderruten/openharness/internal/adapters/skills/fs"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 // skillsAvailable returns true when the Skills feature is wired up and

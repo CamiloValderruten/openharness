@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/messaging"
+	"github.com/CamiloValderruten/openharness/internal/messaging"
 	"github.com/bwmarrin/discordgo"
 )
 

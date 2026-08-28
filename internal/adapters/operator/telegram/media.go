@@ -15,7 +15,7 @@ import (
 
 // InboundMedia configures where collaborator photos are written so sandbox
 // MCP tools (e.g. understand_image) can read them via a bind mount.
-// HostDir is on the Faultline host; ContainerPrefix is the path the agent
+// HostDir is on the OpenHarness host; ContainerPrefix is the path the agent
 // and MCP servers should use (e.g. "/input/telegram").
 type InboundMedia struct {
 	HostDir         string

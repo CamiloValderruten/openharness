@@ -88,7 +88,7 @@ func (s *Server) todayLogPath() string {
 }
 
 // tailFile returns the last n lines of path. We read the whole file
-// and slice — Faultline's daily-rotated logs are typically a few MiB
+// and slice — OpenHarness's daily-rotated logs are typically a few MiB
 // at most, well within the budget for a 2-second poll.
 //
 // For very large files the operator can rotate sooner by tightening

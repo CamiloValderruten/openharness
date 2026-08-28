@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/update"
+	"github.com/CamiloValderruten/openharness/internal/update"
 )
 
 // fakeUpdater is a deterministic stand-in for *update.Updater that

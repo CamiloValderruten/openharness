@@ -18,9 +18,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/config"
-	"github.com/CamiloValderruten/faultline/internal/daemon"
-	"github.com/CamiloValderruten/faultline/internal/log"
+	"github.com/CamiloValderruten/openharness/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/daemon"
+	"github.com/CamiloValderruten/openharness/internal/log"
 )
 
 // Sandbox manages a Python script execution environment backed by Docker and uv.
@@ -81,13 +81,13 @@ var filenamePattern = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]*$`)
 const defaultPyproject = `[project]
 name = "sandbox"
 version = "0.1.0"
-description = "Faultline agent sandbox environment"
+description = "OpenHarness agent sandbox environment"
 requires-python = ">=3.12"
 dependencies = []
 `
 
 const defaultNodePackageJSON = `{
-  "name": "faultline-node-sandbox",
+  "name": "openharness-node-sandbox",
   "version": "0.1.0",
   "private": true,
   "dependencies": {}
@@ -95,7 +95,7 @@ const defaultNodePackageJSON = `{
 `
 
 // NewSandbox creates and initializes a sandbox environment.
-// workDir is the agent's working directory (e.g. /data/faultline).
+// workDir is the agent's working directory (e.g. /data/openharness).
 // logDir is the directory for sandbox execution logs (e.g. ./logs).
 func New(cfg config.SandboxConfig, workDir, logDir string, logger *slog.Logger) (*Sandbox, error) {
 	// Refuse to construct the sandbox while running as root. Every
@@ -109,7 +109,7 @@ func New(cfg config.SandboxConfig, workDir, logDir string, logger *slog.Logger) 
 	// a no-op there; the sandbox doesn't meaningfully support
 	// Windows anyway (no Docker host UID/GID semantics).
 	if uid := os.Getuid(); uid == 0 {
-		return nil, fmt.Errorf("refusing to construct sandbox while running as root: container processes would inherit root via --user 0:0, defeating the unprivileged-execution security model. Run faultline as an unprivileged user (systemd User=, sudo -u <user>, container USER directive, etc.)")
+		return nil, fmt.Errorf("refusing to construct sandbox while running as root: container processes would inherit root via --user 0:0, defeating the unprivileged-execution security model. Run openharness as an unprivileged user (systemd User=, sudo -u <user>, container USER directive, etc.)")
 	}
 
 	dir := cfg.Dir
@@ -671,7 +671,7 @@ func (s *Sandbox) dockerArgs(needsNetwork bool, containerName string) []string {
 // dockerRun executes a docker command and returns combined stdout/stderr.
 // On timeout, the container is explicitly killed to prevent orphaned containers.
 func (s *Sandbox) dockerRun(ctx context.Context, needsNetwork bool, command ...string) (string, error) {
-	containerName := "faultline-sandbox-" + randomID()
+	containerName := "openharness-sandbox-" + randomID()
 	args := s.dockerArgs(needsNetwork, containerName)
 	args = append(args, command...)
 
@@ -731,7 +731,7 @@ func (s *Sandbox) StartStdio(ctx context.Context, name, command string, args []s
 		return nil, fmt.Errorf("create mcp workdir: %w", err)
 	}
 
-	containerName := "faultline-mcp-" + randomID()
+	containerName := "openharness-mcp-" + randomID()
 	runCtx, cancel := context.WithCancel(ctx)
 	dockerArgs := s.mcpStdioArgs(containerName, cwd, env, command, args)
 	cmd := exec.CommandContext(runCtx, "docker", dockerArgs...)
@@ -879,7 +879,7 @@ func (s *Sandbox) ExecuteIsolated(ctx context.Context, command string, mounts []
 		cwd = "/"
 	}
 
-	containerName := "faultline-skill-" + randomID()
+	containerName := "openharness-skill-" + randomID()
 	args := []string{
 		"run", "--rm",
 		"--name", containerName,
@@ -943,7 +943,7 @@ func (s *Sandbox) SkillWorkRoot() string {
 // ResetSkillWork wipes and re-creates the skill-work root. Call this
 // at startup so a stale call_id from a previous session can't
 // accidentally resolve. Best-effort: filesystem errors are returned
-// but Faultline can run with skills disabled if this fails.
+// but OpenHarness can run with skills disabled if this fails.
 func (s *Sandbox) ResetSkillWork() error {
 	root := s.SkillWorkRoot()
 	if err := os.RemoveAll(root); err != nil {

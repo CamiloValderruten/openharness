@@ -76,15 +76,15 @@ Pre-compiled release binaries are available for Linux (`amd64`, `arm64`) and mac
 
 ```bash
 # Download latest release
-curl -L -O https://github.com/CamiloValderruten/faultline/releases/latest/download/faultline_linux_x86_64.tar.gz
-curl -L -O https://github.com/CamiloValderruten/faultline/releases/latest/download/SHA256SUMS
+curl -L -O https://github.com/CamiloValderruten/openharness/releases/latest/download/openharness_linux_x86_64.tar.gz
+curl -L -O https://github.com/CamiloValderruten/openharness/releases/latest/download/SHA256SUMS
 
 # Verify integrity
 sha256sum -c SHA256SUMS --ignore-missing
 
 # Extract & Install
-tar xzf faultline_linux_x86_64.tar.gz
-sudo install faultline /usr/local/bin/openharness
+tar xzf openharness_linux_x86_64.tar.gz
+sudo install openharness /usr/local/bin/openharness
 ```
 
 ### 2. Build from Source
@@ -92,9 +92,9 @@ sudo install faultline /usr/local/bin/openharness
 Requires **Go 1.26+**:
 
 ```bash
-git clone https://github.com/CamiloValderruten/faultline.git openharness
+git clone https://github.com/CamiloValderruten/openharness.git openharness
 cd openharness
-go build -o openharness ./cmd/faultline
+go build -o openharness ./cmd/openharness
 ```
 
 ### 3. Initialize Configuration
@@ -120,7 +120,7 @@ max_context_tokens = 32000
 
 [sandbox]
 enabled = true
-image = "ghcr.io/camilovalderruten/faultline-sandbox:latest"
+image = "ghcr.io/camilovalderruten/openharness-sandbox:latest"
 ```
 
 ### 4. Run OpenHarness

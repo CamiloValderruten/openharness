@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 func TestLastCollaboratorMessage(t *testing.T) {

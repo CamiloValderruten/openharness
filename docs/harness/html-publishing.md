@@ -1,6 +1,6 @@
 # HTML Publishing Harness
 
-Write files to the sandbox **`output/html/`** directory (host path `<sandbox.dir>/output/html`). With `[publish]` enabled, Faultline serves them at **`/html/<path>`** on a loopback bind. A Cloudflare Tunnel (or any reverse proxy) maps each agent's public hostname to that bind:
+Write files to the sandbox **`output/html/`** directory (host path `<sandbox.dir>/output/html`). With `[publish]` enabled, OpenHarness serves them at **`/html/<path>`** on a loopback bind. A Cloudflare Tunnel (or any reverse proxy) maps each agent's public hostname to that bind:
 
 | Agent | Example public URL | Typical local bind |
 |-------|--------------------|--------------------|

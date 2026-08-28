@@ -12,7 +12,7 @@ description: >
 
 # HTML Artifact
 
-Ship a **visual deliverable** the collaborator opens in a browser — like Claude Artifacts or Cursor Canvas — backed by Faultline's HTML publishing harness.
+Ship a **visual deliverable** the collaborator opens in a browser — like Claude Artifacts or Cursor Canvas — backed by OpenHarness's HTML publishing harness.
 
 You write files into the sandbox publish root; `[publish]` serves them; you **always** hand the user a Discord **link button**. Publishing without a button is incomplete.
 

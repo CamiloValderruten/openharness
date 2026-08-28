@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/daemon"
+	"github.com/CamiloValderruten/openharness/internal/daemon"
 )
 
 func TestParseAlertLine(t *testing.T) {

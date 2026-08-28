@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 func (te *Executor) daemonAlertInbox() interface{ HasPending() bool } {
@@ -27,12 +27,12 @@ func (te *Executor) daemonToolDefs() []llm.Tool {
 			Type: llm.ToolTypeFunction,
 			Function: &llm.FunctionDef{
 				Name: "daemon_spawn",
-				Description: "Start a long-lived Docker daemon that survives Faultline restarts and host reboots " +
+				Description: "Start a long-lived Docker daemon that survives OpenHarness restarts and host reboots " +
 					"(--restart unless-stopped). Command must run a flat script under /scripts/ " +
 					"(write it with sandbox_write first). A description is required so daemon_list " +
 					"remains meaningful after context compaction. Inherits sandbox network/memory/user settings. " +
 					"Per-daemon /work is mounted read-write. To wake the agent, append JSONL lines with a " +
-					"\"message\" field to /work/alerts.jsonl (also $FAULTLINE_ALERTS); the harness injects them " +
+					"\"message\" field to /work/alerts.jsonl (also $OPENHARNESS_ALERTS); the harness injects them " +
 					"into the conversation and interrupts sleep. Use stdout JSONL for routine logs (daemon_fetch).",
 				Parameters: map[string]interface{}{
 					"type": "object",
@@ -64,8 +64,8 @@ func (te *Executor) daemonToolDefs() []llm.Tool {
 			Type: llm.ToolTypeFunction,
 			Function: &llm.FunctionDef{
 				Name: "daemon_list",
-				Description: "List this agent's daemon containers via Docker labels (faultline.owner). " +
-					"Works after Faultline restarts and host reboots. Includes description and status.",
+				Description: "List this agent's daemon containers via Docker labels (openharness.owner). " +
+					"Works after OpenHarness restarts and host reboots. Includes description and status.",
 				Parameters: map[string]interface{}{
 					"type":       "object",
 					"properties": map[string]interface{}{},

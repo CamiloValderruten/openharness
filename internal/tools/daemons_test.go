@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/sandbox/docker"
-	"github.com/CamiloValderruten/faultline/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/adapters/sandbox/docker"
+	"github.com/CamiloValderruten/openharness/internal/config"
 )
 
 func TestDaemonToolsAbsentUntilEnabled(t *testing.T) {
@@ -22,7 +22,7 @@ func TestDaemonToolsPresentAfterEnableDaemons(t *testing.T) {
 	work := t.TempDir()
 	sb, err := docker.New(config.SandboxConfig{
 		Enabled:     true,
-		Image:       "faultline-sandbox",
+		Image:       "openharness-sandbox",
 		Dir:         "./sandbox",
 		MemoryLimit: "128m",
 	}, work, filepath.Join(work, "logs"), slog.Default())

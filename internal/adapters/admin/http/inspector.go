@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
-	skillsfs "github.com/CamiloValderruten/faultline/internal/adapters/skills/fs"
-	"github.com/CamiloValderruten/faultline/internal/agent"
-	"github.com/CamiloValderruten/faultline/internal/subagent"
-	"github.com/CamiloValderruten/faultline/internal/tools"
-	"github.com/CamiloValderruten/faultline/internal/update"
+	skillsfs "github.com/CamiloValderruten/openharness/internal/adapters/skills/fs"
+	"github.com/CamiloValderruten/openharness/internal/agent"
+	"github.com/CamiloValderruten/openharness/internal/subagent"
+	"github.com/CamiloValderruten/openharness/internal/tools"
+	"github.com/CamiloValderruten/openharness/internal/update"
 )
 
 // AgentInspector is the read-only port the admin server uses to
@@ -62,7 +62,7 @@ type UpdateInspector interface {
 }
 
 // ConfigStore is the read+write port for the configuration page.
-// Implemented in cmd/faultline/admin.go where the file path and the
+// Implemented in cmd/openharness/admin.go where the file path and the
 // graceful-shutdown trigger are available; the admin server only
 // needs a small surface.
 //

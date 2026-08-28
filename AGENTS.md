@@ -1,14 +1,14 @@
 # Agents Guide
 
-This document describes the code structure, architecture, and design decisions in Faultline to help AI coding agents (and humans) navigate and modify the codebase effectively.
+This document describes the code structure, architecture, and design decisions in OpenHarness to help AI coding agents (and humans) navigate and modify the codebase effectively.
 
 ## Project Layout
 
-Faultline follows hexagonal (ports & adapters) architecture. The agent loop is the domain hexagon; everything else (LLM, memory, telegram, sandbox, IMAP, state persistence) is an adapter behind a port the domain owns.
+OpenHarness follows hexagonal (ports & adapters) architecture. The agent loop is the domain hexagon; everything else (LLM, memory, telegram, sandbox, IMAP, state persistence) is an adapter behind a port the domain owns.
 
 ```
-faultline/
-  cmd/faultline/
+openharness/
+  cmd/openharness/
     main.go                   composition root: parse config, build adapters,
                               wire them into the agent via ports, run the loop
   internal/
@@ -45,7 +45,7 @@ faultline/
                               Validate*) — adapter is in adapters/skills/fs
     subagent/                 domain types + Manager for subagent delegation
                               (Profile, Report, ActiveStatus); spawnFn
-                              bridge to composition lives in cmd/faultline
+                              bridge to composition lives in cmd/openharness
     llm/                      shared LLM types (Message, Tool, ChatRequest, ...)
                               + heuristic token estimator
     adapters/
@@ -80,7 +80,7 @@ The `internal/` prefix is enforced by Go: nothing outside this module can import
 ## Architecture Overview
 
 ```
-cmd/faultline/main.go
+cmd/openharness/main.go
   |
   +-> Parse config, build logger
   |
@@ -138,7 +138,7 @@ cmd/faultline/main.go
         |                            shared helper in tools/vector.go also drives
         |                            startup reconcile from main.go)
         |     +-> subagent_run     (sync; subagent.Manager.Run; child agent loop
-        |                            via spawnFn closure in cmd/faultline)
+        |                            via spawnFn closure in cmd/openharness)
         |     +-> subagent_spawn   (async; returns work_id; report lands in
         |                            inbox alongside operator queue)
         |     +-> subagent_wait    (block until named subagent reports;
@@ -156,7 +156,7 @@ cmd/faultline/main.go
 
 ## Module Details
 
-### cmd/faultline/main.go
+### cmd/openharness/main.go
 
 The composition root. It is the only place in the codebase that knows which adapter implements which port.
 
@@ -217,7 +217,7 @@ The hexagon. Pure domain logic with no I/O outside what the ports allow.
 - **`executor.go`**: `Executor` struct, `New()` constructor, `ToolDefs()` (tool registry advertised to the LLM), `Execute()` (which times the dispatch, fans the result to an optional `Observer`, and delegates to the historical switch in `dispatch()`), web fetching with custom HTML-to-markdown converter (~400 lines), `webCache` with TTL eviction, all `memory_*` / `sandbox_*` / utility (`get_time`, `sleep`, `send_message`, `context_status`) handlers.
 - **`observer.go`**: `Observer` interface (consumer-side) and `ToolCallEvent` value type. `OnToolCall` is invoked synchronously after every dispatch returns; the admin UI's ring buffer is the only current implementation. Args / result fields are pre-truncated via `summarizeToolField` (rune-safe) to keep events compact; `classifyToolError` lifts `Error:` / `Failed:` prefixes into a structured field for UI styling.
 - **`chunk.go`**: paragraph-aware splitter (`splitIntoUnits`), unit-key encoding helpers (`unitKey`, `pathFromUnitKey`, `chunkIdxFromUnitKey`). `maxParagraphBytes = 3000` is the only fallback cap — applied only when a single paragraph exceeds it, in which case it's byte-cut into sequential pieces.
-- **`vector.go`**: `Embedder` interface (consumer-side; defined here rather than in `agent/ports.go` because the agent loop never embeds), per-mutation paragraph-aware reindex helpers (`reindexVector`, `removeVector`, `removeVectorPrefix`, `renameVector`, `reindexVectorDir`), path-exclusion logic (skip `prompts/` and `.trash/`), the adaptive batcher `embedWithAdaptiveBatching` (halves batch size on failure, grows back after 5 success streak, skips single-input failures), `fileLevelHits` for collapsing chunk-level search hits to one-per-file, dual-mode `memory_search` description selector, and the bulk reconcile/rebuild entry points (`ReconcileVectorIndex`, `RebuildVectorIndex`) used by both the startup reconcile in `cmd/faultline/embeddings.go` and the `rebuild_indexes` tool. The mutation hooks called from `executor.go` are no-ops when the feature is disabled, so the dispatcher code is identical regardless of operator config.
+- **`vector.go`**: `Embedder` interface (consumer-side; defined here rather than in `agent/ports.go` because the agent loop never embeds), per-mutation paragraph-aware reindex helpers (`reindexVector`, `removeVector`, `removeVectorPrefix`, `renameVector`, `reindexVectorDir`), path-exclusion logic (skip `prompts/` and `.trash/`), the adaptive batcher `embedWithAdaptiveBatching` (halves batch size on failure, grows back after 5 success streak, skips single-input failures), `fileLevelHits` for collapsing chunk-level search hits to one-per-file, dual-mode `memory_search` description selector, and the bulk reconcile/rebuild entry points (`ReconcileVectorIndex`, `RebuildVectorIndex`) used by both the startup reconcile in `cmd/openharness/embeddings.go` and the `rebuild_indexes` tool. The mutation hooks called from `executor.go` are no-ops when the feature is disabled, so the dispatcher code is identical regardless of operator config.
 - **`wiki.go`**: `wiki_fetch` tool (MediaWiki API + plain-text extraction + cache).
 - **`html_test.go`**: HTML-to-markdown conversion tests.
 
@@ -239,7 +239,7 @@ Lifecycle:
 
 Pure-Go in-memory vector index keyed by string paths. `vector.Index` provides `Upsert`, `Remove`, `RemovePrefix`, `Rename`, `Search`, plus chunk-aware variants `RemoveChunks` / `RenameChunks` / `HasChunks` for paragraph-keyed entries (`path#N`) and `Save`/`Load` against a custom binary format ("FVEC v1") so embeddings persist across restarts.
 
-- Brute-force cosine similarity over a `map[string][]float32`. At Faultline's scale (low-thousands of files, 1536-dim vectors) flat scan is sub-millisecond; HNSW/IVF was ruled out as overkill.
+- Brute-force cosine similarity over a `map[string][]float32`. At OpenHarness's scale (low-thousands of files, 1536-dim vectors) flat scan is sub-millisecond; HNSW/IVF was ruled out as overkill.
 - Vectors are L2-normalised on Upsert so Search can use plain dot products.
 - Keys are strings: bare `path` for single-paragraph files, `path#N` for chunked. The `#`-separator is unambiguous because the memory path validator restricts segments to `[a-z0-9.-]`. Dedup of paragraph-level results down to file level happens in the tools layer (`fileLevelHits`), not in the index.
 - Binary format: `magic[4]="FVEC" | version[4] | dim[4] | count[4] | model_len[2] | model[N] | records[count]{path_len[2], path[N], vec[dim*4]}`. Deterministic ordering (keys sorted on save) for byte-stable diffs in tests.
@@ -305,10 +305,10 @@ Shared LLM-shaped value types. The OpenAI chat-completions wire shape is treated
 
 ### internal/adapters/sandbox/docker/
 
-`docker.Sandbox` for Docker-backed script execution. The default image (`ghcr.io/camilovalderruten/faultline-sandbox`, built from `docker/sandbox/Dockerfile`) is a multi-runtime Arch-based image with Python+pip, uv+uvx, Node+npm+npx, Bun, Deno, Go, and common CLI tools (curl, jq, ripgrep, fd, git, ...). Any image with `sh` and `uv` on PATH satisfies the adapter's contract; the image is configurable per deployment.
+`docker.Sandbox` for Docker-backed script execution. The default image (`ghcr.io/camilovalderruten/openharness-sandbox`, built from `docker/sandbox/Dockerfile`) is a multi-runtime Arch-based image with Python+pip, uv+uvx, Node+npm+npx, Bun, Deno, Go, and common CLI tools (curl, jq, ripgrep, fd, git, ...). Any image with `sh` and `uv` on PATH satisfies the adapter's contract; the image is configurable per deployment.
 
 - Flat directory layout: `scripts/`, `input/`, `output/` plus a seeded `pyproject.toml`.
-- Ephemeral containers per operation (`docker run --rm`). Every run passes `--user <host_uid>:<host_gid>` for file ownership and `--security-opt no-new-privileges` to block setuid escalation. The image's Dockerfile additionally bakes in `USER 65532:65532` as a defense-in-depth fallback; if `--user` is ever omitted by a future code path, the container still refuses to run as root. The agent itself refuses to start as root (`os.Getuid()==0` is fatal in `cmd/faultline/main.go` and again in `sandbox.New`).
+- Ephemeral containers per operation (`docker run --rm`). Every run passes `--user <host_uid>:<host_gid>` for file ownership and `--security-opt no-new-privileges` to block setuid escalation. The image's Dockerfile additionally bakes in `USER 65532:65532` as a defense-in-depth fallback; if `--user` is ever omitted by a future code path, the container still refuses to run as root. The agent itself refuses to start as root (`os.Getuid()==0` is fatal in `cmd/openharness/main.go` and again in `sandbox.New`).
 - Filenames validated against a strict regex (`^[a-z0-9][a-z0-9._-]*$`).
 - Network access toggleable; memory limits enforced.
 - `sandbox_execute` drives Python via `uv` (`uv sync && uv run python /scripts/X`); `sandbox_shell` runs arbitrary `sh -c` commands so the agent can drive any other runtime on PATH directly.
@@ -343,11 +343,11 @@ Shared LLM-shaped value types. The OpenAI chat-completions wire shape is treated
 
 Self-update orchestration. Polls the configured GitHub repo's `releases/latest`, compares versions, downloads the matching tarball, verifies it against `SHA256SUMS`, swaps the binary in place, and triggers graceful shutdown so the new binary takes over.
 
-- **`Updater`**: main type. Constructed once in `cmd/faultline/main.go`, shared with the tools package via `Check` / `Apply` methods so the `update_check` / `update_apply` tools can drive the same pipeline.
+- **`Updater`**: main type. Constructed once in `cmd/openharness/main.go`, shared with the tools package via `Check` / `Apply` methods so the `update_check` / `update_apply` tools can drive the same pipeline.
 - **`Run(ctx)`**: background polling loop. First check delayed 30s to avoid hammering GitHub on tight restart loops; subsequent checks on `cfg.CheckInterval`. No-op when `cfg.Enabled` is false.
 - **`Apply(ctx)`**: downloads, verifies SHA256, extracts the binary from the tarball, atomically swaps (rotating old to `<binary>.previous` as a one-deep rollback slot), records to `meta/version-history.md`, and calls the `TriggerShutdown` callback. Serialized by an internal mutex; an `applied` atomic flag prevents repeat applies after one has succeeded.
-- **`Result`**: the value `TriggerShutdown` receives — used by `cmd/faultline/main.go` to decide whether to `os.Exit(0)`, `syscall.Exec` the new binary, or run a configured restart command after `Agent.Run` returns.
-- Asset selection follows goreleaser's name template: `faultline_<version>_<os>_<arch>.tar.gz`, with `amd64` rewritten to `x86_64` to match the Linux convention.
+- **`Result`**: the value `TriggerShutdown` receives — used by `cmd/openharness/main.go` to decide whether to `os.Exit(0)`, `syscall.Exec` the new binary, or run a configured restart command after `Agent.Run` returns.
+- Asset selection follows goreleaser's name template: `openharness_<version>_<os>_<arch>.tar.gz`, with `amd64` rewritten to `x86_64` to match the Linux convention.
 - `IsNewer` / `IsPrerelease` use `golang.org/x/mod/semver` for tag comparison; non-semver "current" (e.g. `dev` from a local build) is treated as the oldest possible version, so dev builds upgrade to real releases when self-update is enabled.
 
 ### internal/adapters/auth/users/
@@ -366,7 +366,7 @@ The UI is a multi-section dashboard shell — persistent sidebar (Dashboard / Co
 
 - **`server.go`**: `Server`, `New`, `Run`, `Shutdown`, route registration, `SetInspectors` for late-bound agent + subagent ports. Each (layout, content) pair is parsed once at startup into its own `*template.Template` so the `{{define "content"}}` blocks across content files do not collide as they would in a single ParseFS-parsed set. `cacheImmutable` middleware tags `/admin/static/` responses with `Cache-Control: public, max-age=31536000, immutable` so the browser never revalidates the embedded assets.
 - **`middleware.go`**: `requireAuth` (session lookup + CSRF check on non-safe methods), `requestLogger` (per-request structured log line; static-asset paths demoted to debug). The request log is routed to `Deps.RequestLogger` when wired — a dedicated `admin-http-YYYY-MM-DD.log` file in `cfg.Log.Dir` constructed via `internal/log.NewDailyPrefixed` — because the dashboard's 1-2 s fragment polling generates one log line per request and would drown out the main log otherwise. Falls back to `Deps.Logger` when the dedicated sink isn't wired (test harnesses).
-- **`handlers_auth.go`**: `GET/POST /admin/login`, `POST /admin/logout`. Login uses a separate short-lived `faultline_login_csrf` cookie because there is no session yet at that point; the cookie is rotated on every form render and cleared on successful login. Failed logins return a generic message and an HTTP 401, never disclosing whether the username existed. The login page is the only one that paints the `boot-flicker` animation and the matrix-rain canvas (`assets/matrixrain.js`); both are deliberately scoped there because they would be hostile on a continuously-polled dashboard.
+- **`handlers_auth.go`**: `GET/POST /admin/login`, `POST /admin/logout`. Login uses a separate short-lived `openharness_login_csrf` cookie because there is no session yet at that point; the cookie is rotated on every form render and cleared on successful login. Failed logins return a generic message and an HTTP 401, never disclosing whether the username existed. The login page is the only one that paints the `boot-flicker` animation and the matrix-rain canvas (`assets/matrixrain.js`); both are deliberately scoped there because they would be hostile on a continuously-polled dashboard.
 - **`page.go`**: `pageData` is the common base struct every authenticated page embeds. Holds `Username`, `CSRFToken`, `Section` / `SectionLabel` (the active sidebar key + its human label), `Nav` (the sidebar list with the current row's `Active` flag set), plus `Version` / `Uptime` / `StartedAt` for the layout footer. `basePageData(r, section)` is the single helper every page handler calls; the `navItems` table is the source of truth for the sidebar order and adding a section is a one-line change there plus a new content template + route.
 - **`handlers_dashboard.go`**: dashboard shell + the live HTMX fragments (`/admin/fragments/status`, `/admin/fragments/tools`, `/admin/fragments/subagents`, `/admin/fragments/skills`, `/admin/fragments/update`, `/admin/fragments/logs`). Fragments are pre-parsed standalone templates (no layout) and served with `Cache-Control: no-store`. Pages poll their fragments at 1–2 s via `hx-trigger="load, every Ns"` — SSE was deferred because polling is cheap on a single-operator UI and avoids an extra JS extension. The same file holds the page handlers for the simpler sections (`handleSubagentsPage`, `handleSkillsPage`, `handleVersionPage`); the configuration page lives in its own file because of the reflection-driven form. `templateFuncs` exposes `formatDuration`, `formatRelative`, `sinceShort`, `percent`, `phaseClass`, `errorClass` to keep templates free of arithmetic.
 - **`handlers_logs.go`**: `/admin/logs` page + `/admin/fragments/logs` live tail. Reads `<Deps.LogDir>/YYYY-MM-DD.log` with a 2 MiB tail cap and a ring of the last `logTailLines` (400) entries. `classifyLogLevel` scans for slog's `level=...` token to assign a `lvl-*` CSS class for terminal-style severity colouring; the fragment auto-scrolls to the bottom on each swap.
@@ -377,7 +377,7 @@ The UI is a multi-section dashboard shell — persistent sidebar (Dashboard / Co
 - **`assets/`**: vendored `htmx.min.js` (2.0.9), `tailwind.js` (`@tailwindcss/browser@4`, in-browser JIT), `daisyui.css` and `daisyui-themes.css` (5.5.19), `terminal.css` (custom matrix theme + tab/log/sidebar styling), `matrixrain.js` (login-only katakana rain), and `fonts/{vt323,sharetechmono}.woff2` (OFL, ~46 KB combined; converted from upstream TTF via `fontTools`). All embedded via `go:embed`. Tailwind in the browser was chosen over a build-step CLI because the admin UI is low-traffic and avoiding a Node-flavored toolchain was an explicit requirement. The layout `<head>` preloads both fonts via `<link rel="preload">` so first paint avoids FOUT even on cold cache.
 - **`templates/`**: `layout.html` (drawer + navbar + sidebar shell), `login.html`, plus per-section content files `dashboard.html`, `configuration.html`, `subagents.html`, `skills.html`, `version.html`, `logs.html`, plus the fragment templates `frag_status.html`, `frag_tools.html`, `frag_subagents.html`, `frag_skills.html`, `frag_update.html`, `frag_logs.html`. Embedded via `go:embed`.
 
-Composition wiring lives in `cmd/faultline/admin.go`. The admin server runs under the parent process context: first SIGINT closes `shutdownCh` (agent saves state) but the admin server stays up; second SIGINT cancels the parent context and the server shuts down. After the agent loop returns, `main.go` cancels the context explicitly so the admin server unblocks for clean exit. The composition root constructs the dedicated `admin-http-*.log` daily writer via `internal/log.NewDailyPrefixed` and closes it in `adminServer.Close`.
+Composition wiring lives in `cmd/openharness/admin.go`. The admin server runs under the parent process context: first SIGINT closes `shutdownCh` (agent saves state) but the admin server stays up; second SIGINT cancels the parent context and the server shuts down. After the agent loop returns, `main.go` cancels the context explicitly so the admin server unblocks for clean exit. The composition root constructs the dedicated `admin-http-*.log` daily writer via `internal/log.NewDailyPrefixed` and closes it in `adminServer.Close`.
 
 The wiring order is load-bearing: admin is built first (it owns the tool ring buffer), the tool executor takes that buffer as its `Observer`, the agent is built on top of the executor, then the agent + subagent manager are attached back to the admin server via `SetInspectors`. Every inspector port is nil-allowed; pages render disabled-feature placeholders when an inspector is missing.
 
@@ -429,7 +429,7 @@ overlays anything set in the TOML file on top.
 
 ### Commit messages: Conventional Commits
 
-Faultline uses [Conventional Commits](https://www.conventionalcommits.org/)
+OpenHarness uses [Conventional Commits](https://www.conventionalcommits.org/)
 because release-please derives version bumps and changelog entries from
 the commit log on `main`.
 

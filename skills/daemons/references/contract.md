@@ -2,7 +2,7 @@
 
 ## Agent wake
 
-Append JSON Lines to `/work/alerts.jsonl` (`$FAULTLINE_ALERTS`).
+Append JSON Lines to `/work/alerts.jsonl` (`$OPENHARNESS_ALERTS`).
 
 Required field: `message` (string). Optional extras (`type`, `severity`, …) are ignored by the harness for injection text but may help you when reading the file later.
 
