@@ -9,15 +9,15 @@ import (
 
 func TestDaemonRunArgsDetachedPersistent(t *testing.T) {
 	s := &Sandbox{
-		dir:         "/tmp/faultline/sandbox",
-		image:       "faultline-sandbox",
+		dir:         "/tmp/openharness/sandbox",
+		image:       "openharness-sandbox",
 		memoryLimit: "128m",
 		uid:         1000,
 		gid:         1000,
 	}
 	owner := "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
 	args := s.daemonRunArgs(
-		"faultline-daemon-aaaaaaaa-abc123",
+		"openharness-daemon-aaaaaaaa-abc123",
 		owner, "abc123", "price-watch", "Poll BTC prices",
 		"2026-08-10T17:00:00Z",
 		map[string]string{"SYMBOL": "BTC"},
@@ -27,20 +27,20 @@ func TestDaemonRunArgsDetachedPersistent(t *testing.T) {
 	for _, want := range []string{
 		"run", "-d",
 		"--restart\x00unless-stopped",
-		"--name\x00faultline-daemon-aaaaaaaa-abc123",
-		"--label\x00faultline.daemon=1",
-		"--label\x00faultline.owner=" + owner,
-		"--label\x00faultline.daemon.id=abc123",
-		"--label\x00faultline.daemon.name=price-watch",
-		"--label\x00faultline.daemon.description=Poll BTC prices",
-		"-v\x00/tmp/faultline/sandbox/scripts:/scripts:ro",
-		"-v\x00/tmp/faultline/sandbox/daemons/abc123:/work:rw",
+		"--name\x00openharness-daemon-aaaaaaaa-abc123",
+		"--label\x00openharness.daemon=1",
+		"--label\x00openharness.owner=" + owner,
+		"--label\x00openharness.daemon.id=abc123",
+		"--label\x00openharness.daemon.name=price-watch",
+		"--label\x00openharness.daemon.description=Poll BTC prices",
+		"-v\x00/tmp/openharness/sandbox/scripts:/scripts:ro",
+		"-v\x00/tmp/openharness/sandbox/daemons/abc123:/work:rw",
 		"--user\x001000:1000",
 		"--security-opt\x00no-new-privileges",
 		"--network=none",
 		"-e\x00SYMBOL=BTC",
-		"-e\x00FAULTLINE_ALERTS=/work/alerts.jsonl",
-		"faultline-sandbox\x00python3\x00/scripts/watch.py",
+		"-e\x00OPENHARNESS_ALERTS=/work/alerts.jsonl",
+		"openharness-sandbox\x00python3\x00/scripts/watch.py",
 	} {
 		if !strings.Contains(joined, want) {
 			t.Fatalf("docker args missing %q in %v", want, args)
@@ -53,8 +53,8 @@ func TestDaemonRunArgsDetachedPersistent(t *testing.T) {
 
 func TestDaemonRunArgsInheritsNetwork(t *testing.T) {
 	s := &Sandbox{
-		dir:         "/tmp/faultline/sandbox",
-		image:       "faultline-sandbox",
+		dir:         "/tmp/openharness/sandbox",
+		image:       "openharness-sandbox",
 		memoryLimit: "128m",
 		uid:         1000,
 		gid:         1000,

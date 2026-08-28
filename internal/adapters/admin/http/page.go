@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/version"
+	"github.com/CamiloValderruten/openharness/internal/version"
 )
 
 // pageData is the common set of fields every full-page render needs:

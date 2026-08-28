@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/mcp"
-	"github.com/CamiloValderruten/faultline/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/adapters/mcp"
+	"github.com/CamiloValderruten/openharness/internal/config"
 )
 
 func TestBuildOAuthCallbackServerDisabledWithoutPublicBaseURL(t *testing.T) {

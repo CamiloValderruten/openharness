@@ -3,7 +3,7 @@
 // when no real tokenizer is available.
 //
 // The OpenAI chat-completions wire shape is treated as the de facto domain
-// language for LLM messaging: every backend faultline plausibly targets
+// language for LLM messaging: every backend openharness plausibly targets
 // (real OpenAI, KoboldCpp, vLLM, llama.cpp, Anthropic via proxy) speaks
 // it. Inventing a parallel domain shape just to translate it 1:1 at every
 // adapter boundary would be ceremony for no testability win. See the
@@ -14,7 +14,7 @@ package llm
 // completions API. We previously used github.com/sashabaranov/go-openai,
 // but that library does not expose a way to inject vendor-specific extras
 // (top_k, min_p, repetition_penalty, etc.) into chat completion requests.
-// Since faultline only needs a tiny slice of the API (one POST endpoint,
+// Since openharness only needs a tiny slice of the API (one POST endpoint,
 // no streaming, no embeddings), it was simpler to drop the dependency and
 // own the types directly.
 //

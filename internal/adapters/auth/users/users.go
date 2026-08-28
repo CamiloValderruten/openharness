@@ -129,7 +129,7 @@ func (s *Store) bootstrap() (*BootstrapResult, error) {
 // stale, possibly misleading).
 func (s *Store) saveWithBootstrapComment(plaintextPassword string) error {
 	var b strings.Builder
-	b.WriteString("# Faultline admin users.\n")
+	b.WriteString("# OpenHarness admin users.\n")
 	b.WriteString("#\n")
 	b.WriteString("# This file was auto-generated on first run with a single admin\n")
 	b.WriteString("# user. The randomly generated password is recorded below as a\n")
@@ -235,7 +235,7 @@ func (s *Store) Verify(username, password string) (User, error) {
 var dummyHash string
 
 func init() {
-	h, err := HashPassword("faultline-timing-shield")
+	h, err := HashPassword("openharness-timing-shield")
 	if err != nil {
 		// HashPassword cannot fail for a valid 8+ char input;
 		// panicking at init is the right behavior if it does.

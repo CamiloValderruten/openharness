@@ -19,7 +19,7 @@ import (
 //     directory (so the eventual rename is on the same filesystem and
 //     therefore atomic).
 //  2. Download SHA256SUMS, verify the tarball's hash matches its line.
-//  3. Extract the inner faultline binary to <binaryPath>.new.
+//  3. Extract the inner openharness binary to <binaryPath>.new.
 //  4. chmod +x the .new file.
 //  5. Rename current binary to .previous (one-deep rollback slot).
 //  6. Rename .new to current.
@@ -75,7 +75,7 @@ func (u *Updater) apply(ctx context.Context, rel *Release) (*Result, error) {
 			assetName, gotSum, wantSum)
 	}
 
-	// 3. Extract the faultline binary into <current>.new.
+	// 3. Extract the openharness binary into <current>.new.
 	if err := extractBinary(tarPath, newPath); err != nil {
 		_ = os.Remove(newPath)
 		return nil, err
@@ -153,7 +153,7 @@ func fileSha256(path string) (string, error) {
 // fetchExpectedSum downloads SHA256SUMS and finds the entry matching
 // assetName. SHA256SUMS lines look like:
 //
-//	abc123...  faultline_1.0.0_linux_x86_64.tar.gz
+//	abc123...  openharness_1.0.0_linux_x86_64.tar.gz
 //
 // (two-space separator). Returns the expected hex digest.
 func fetchExpectedSum(ctx context.Context, gh *githubClient, url, assetName string) (string, error) {
@@ -181,7 +181,7 @@ func fetchExpectedSum(ctx context.Context, gh *githubClient, url, assetName stri
 }
 
 // extractBinary reads tarPath (a .tar.gz archive) and writes the
-// faultline binary inside it to outPath. Other files in the archive
+// openharness binary inside it to outPath. Other files in the archive
 // (LICENSE, README.md, AGENTS.md, config.example.toml) are ignored --
 // the deployed binary is the only thing the updater swaps.
 func extractBinary(tarPath, outPath string) error {
@@ -208,8 +208,8 @@ func extractBinary(tarPath, outPath string) error {
 		}
 		// goreleaser tarballs are flat (no nested directories), but be
 		// safe and only consider the basename. We accept exactly
-		// "faultline" as the binary entry.
-		if filepath.Base(hdr.Name) != "faultline" || hdr.Typeflag != tar.TypeReg {
+		// "openharness" as the binary entry.
+		if filepath.Base(hdr.Name) != "openharness" || hdr.Typeflag != tar.TypeReg {
 			continue
 		}
 		out, err := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
@@ -228,5 +228,5 @@ func extractBinary(tarPath, outPath string) error {
 		}
 		return nil
 	}
-	return errors.New("tarball did not contain a faultline binary")
+	return errors.New("tarball did not contain a openharness binary")
 }

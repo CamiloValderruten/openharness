@@ -1,4 +1,4 @@
-// Package update polls GitHub releases for newer faultline versions,
+// Package update polls GitHub releases for newer openharness versions,
 // downloads and verifies new release binaries, atomically swaps them
 // into place, and signals the agent loop to shut down so the new
 // binary takes effect.
@@ -18,7 +18,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/version"
+	"github.com/CamiloValderruten/openharness/internal/version"
 )
 
 // rateLimitDefaultBackoff is the delay used when GitHub returns a

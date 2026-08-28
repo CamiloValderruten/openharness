@@ -2,7 +2,7 @@
 
 ## Why
 
-Faultline now ships a small set of file conventions intended to make
+OpenHarness now ships a small set of file conventions intended to make
 long-running agents easier to reason about across self-edits and
 compactions:
 

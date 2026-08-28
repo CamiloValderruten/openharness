@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 // collaboratorDeliveryDebtPrompt replaces the generic continue prompt when

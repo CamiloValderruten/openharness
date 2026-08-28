@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/auth/users"
+	"github.com/CamiloValderruten/openharness/internal/adapters/auth/users"
 )
 
 // testServer wires a real *Server backed by real users + sessions
@@ -152,12 +152,12 @@ func TestServer_LoginGet_RendersForm(t *testing.T) {
 	// Login form should set the login-CSRF cookie.
 	var sawCSRF bool
 	for _, c := range resp.Cookies() {
-		if c.Name == "faultline_login_csrf" && c.Value != "" {
+		if c.Name == "openharness_login_csrf" && c.Value != "" {
 			sawCSRF = true
 		}
 	}
 	if !sawCSRF {
-		t.Fatal("login response did not set faultline_login_csrf cookie")
+		t.Fatal("login response did not set openharness_login_csrf cookie")
 	}
 
 	body, _ := io.ReadAll(resp.Body)
@@ -235,7 +235,7 @@ func TestServer_FullLoginAndDashboard(t *testing.T) {
 	if !strings.Contains(string(body), "signed in as") {
 		t.Fatalf("dashboard body missing navbar signed-in text: %s", body)
 	}
-	if !strings.Contains(string(body), "faultline version") {
+	if !strings.Contains(string(body), "openharness version") {
 		t.Fatalf("dashboard body missing version stat header: %s", body)
 	}
 	if !strings.Contains(string(body), `id="agent-status"`) {
@@ -378,7 +378,7 @@ func TestServer_LoginGet_CSRFCookieStable(t *testing.T) {
 	second := loginCSRFFromJar(t, jar, ts.srv.URL)
 
 	if first == "" {
-		t.Fatal("first GET did not set faultline_login_csrf cookie")
+		t.Fatal("first GET did not set openharness_login_csrf cookie")
 	}
 	if first != second {
 		t.Fatalf("login csrf cookie rotated between renders: %q -> %q", first, second)
@@ -498,7 +498,7 @@ func TestServer_RequireAuth_HTMX_POST_HXRedirect(t *testing.T) {
 }
 
 // loginCSRFFromJar returns the current value of the
-// faultline_login_csrf cookie in jar for the test server's host.
+// openharness_login_csrf cookie in jar for the test server's host.
 func loginCSRFFromJar(t *testing.T, jar http.CookieJar, baseURL string) string {
 	t.Helper()
 	u, err := url.Parse(baseURL + "/admin/login")
@@ -506,7 +506,7 @@ func loginCSRFFromJar(t *testing.T, jar http.CookieJar, baseURL string) string {
 		t.Fatalf("parse url: %v", err)
 	}
 	for _, c := range jar.Cookies(u) {
-		if c.Name == "faultline_login_csrf" {
+		if c.Name == "openharness_login_csrf" {
 			return c.Value
 		}
 	}

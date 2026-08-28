@@ -1,4 +1,4 @@
-# Faultline Agent Harness
+# OpenHarness Agent Harness
 
 This directory documents features that extend the agent's capabilities beyond the core LLM loop. These are conventions and templates the agent uses in its sandbox to produce shareable artifacts (web pages, dashboards, documents) without requiring a build step or external services.
 

@@ -1,7 +1,7 @@
 # Built binary at repo root. Anchored with leading slash so the rule
-# doesn't also swallow the cmd/faultline/ source directory or any
-# future "faultline" file/directory deeper in the tree.
-/faultline
+# doesn't also swallow the cmd/openharness/ source directory or any
+# future "openharness" file/directory deeper in the tree.
+/openharness
 
 # Local deployment configs (may contain secrets)
 config.toml

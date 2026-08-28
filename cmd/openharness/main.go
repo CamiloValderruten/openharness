@@ -1,4 +1,4 @@
-// Faultline composition root: parse config, wire concrete adapters into
+// OpenHarness composition root: parse config, wire concrete adapters into
 // the agent, run the loop. This is the only place in the codebase that
 // knows which adapter implements which port.
 package main
@@ -19,29 +19,29 @@ import (
 	"syscall"
 	"time"
 
-	adminhttp "github.com/CamiloValderruten/faultline/internal/adapters/admin/http"
-	"github.com/CamiloValderruten/faultline/internal/adapters/llm/kobold"
-	"github.com/CamiloValderruten/faultline/internal/adapters/llm/openai"
-	"github.com/CamiloValderruten/faultline/internal/adapters/mcp"
-	"github.com/CamiloValderruten/faultline/internal/adapters/memory/fs"
-	"github.com/CamiloValderruten/faultline/internal/adapters/operator/discord"
-	"github.com/CamiloValderruten/faultline/internal/adapters/operator/telegram"
-	"github.com/CamiloValderruten/faultline/internal/adapters/sandbox/docker"
-	skillsfs "github.com/CamiloValderruten/faultline/internal/adapters/skills/fs"
-	"github.com/CamiloValderruten/faultline/internal/adapters/speech/deepgram"
-	"github.com/CamiloValderruten/faultline/internal/adapters/state/jsonfile"
-	"github.com/CamiloValderruten/faultline/internal/agent"
-	"github.com/CamiloValderruten/faultline/internal/config"
-	"github.com/CamiloValderruten/faultline/internal/log"
-	"github.com/CamiloValderruten/faultline/internal/messaging"
-	"github.com/CamiloValderruten/faultline/internal/prompts"
-	"github.com/CamiloValderruten/faultline/internal/schedule"
-	"github.com/CamiloValderruten/faultline/internal/search/bm25"
-	"github.com/CamiloValderruten/faultline/internal/search/vector"
-	"github.com/CamiloValderruten/faultline/internal/subagent"
-	"github.com/CamiloValderruten/faultline/internal/tools"
-	"github.com/CamiloValderruten/faultline/internal/update"
-	"github.com/CamiloValderruten/faultline/internal/version"
+	adminhttp "github.com/CamiloValderruten/openharness/internal/adapters/admin/http"
+	"github.com/CamiloValderruten/openharness/internal/adapters/llm/kobold"
+	"github.com/CamiloValderruten/openharness/internal/adapters/llm/openai"
+	"github.com/CamiloValderruten/openharness/internal/adapters/mcp"
+	"github.com/CamiloValderruten/openharness/internal/adapters/memory/fs"
+	"github.com/CamiloValderruten/openharness/internal/adapters/operator/discord"
+	"github.com/CamiloValderruten/openharness/internal/adapters/operator/telegram"
+	"github.com/CamiloValderruten/openharness/internal/adapters/sandbox/docker"
+	skillsfs "github.com/CamiloValderruten/openharness/internal/adapters/skills/fs"
+	"github.com/CamiloValderruten/openharness/internal/adapters/speech/deepgram"
+	"github.com/CamiloValderruten/openharness/internal/adapters/state/jsonfile"
+	"github.com/CamiloValderruten/openharness/internal/agent"
+	"github.com/CamiloValderruten/openharness/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/log"
+	"github.com/CamiloValderruten/openharness/internal/messaging"
+	"github.com/CamiloValderruten/openharness/internal/prompts"
+	"github.com/CamiloValderruten/openharness/internal/schedule"
+	"github.com/CamiloValderruten/openharness/internal/search/bm25"
+	"github.com/CamiloValderruten/openharness/internal/search/vector"
+	"github.com/CamiloValderruten/openharness/internal/subagent"
+	"github.com/CamiloValderruten/openharness/internal/tools"
+	"github.com/CamiloValderruten/openharness/internal/update"
+	"github.com/CamiloValderruten/openharness/internal/version"
 )
 
 func main() {
@@ -67,9 +67,9 @@ func main() {
 	// rather than silently downgrading to an insecure run.
 	//
 	// os.Getuid returns -1 on Windows, so this is effectively a
-	// no-op there; faultline isn't a meaningful Windows target.
+	// no-op there; openharness isn't a meaningful Windows target.
 	if uid := os.Getuid(); uid == 0 {
-		fmt.Fprintln(os.Stderr, "faultline: refusing to run as root (uid=0). The agent has broad filesystem and network access; running as root means a prompt injection or a malicious skill compromises the whole machine. Run as an unprivileged user (systemd User=, sudo -u <user>, container USER directive, etc.). To override this check intentionally is not supported.")
+		fmt.Fprintln(os.Stderr, "openharness: refusing to run as root (uid=0). The agent has broad filesystem and network access; running as root means a prompt injection or a malicious skill compromises the whole machine. Run as an unprivileged user (systemd User=, sudo -u <user>, container USER directive, etc.). To override this check intentionally is not supported.")
 		os.Exit(1)
 	}
 

@@ -2,7 +2,7 @@ package adminhttp
 
 import "embed"
 
-// staticFS holds the vendored frontend assets shipped with Faultline.
+// staticFS holds the vendored frontend assets shipped with OpenHarness.
 //
 // Pinned versions:
 //   - htmx.min.js               2.0.9   (https://htmx.org)

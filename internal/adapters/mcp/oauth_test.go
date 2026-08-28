@@ -26,7 +26,7 @@ func TestOAuthManagerStartBuildsAuthorizationURLWithPKCE(t *testing.T) {
 	defer provider.Close()
 	mgr := NewOAuthManager(
 		[]ServerConfig{oauthTestServerConfig("coralogix", provider.URL)},
-		OAuthOptions{PublicBaseURL: "https://faultline.example.com", CallbackPath: "/oauth/callback", StateTTL: time.Minute},
+		OAuthOptions{PublicBaseURL: "https://openharness.example.com", CallbackPath: "/oauth/callback", StateTTL: time.Minute},
 		newMemoryCredentialStore(),
 		provider.Client(),
 	)
@@ -51,7 +51,7 @@ func TestOAuthManagerStartBuildsAuthorizationURLWithPKCE(t *testing.T) {
 	if values.Get("code_challenge_method") != "S256" {
 		t.Fatalf("code_challenge_method = %q, want S256", values.Get("code_challenge_method"))
 	}
-	if values.Get("redirect_uri") != "https://faultline.example.com/oauth/callback" {
+	if values.Get("redirect_uri") != "https://openharness.example.com/oauth/callback" {
 		t.Fatalf("redirect_uri = %q", values.Get("redirect_uri"))
 	}
 }
@@ -62,7 +62,7 @@ func TestOAuthManagerCompleteExchangesCodeAndStoresCredential(t *testing.T) {
 	store := newMemoryCredentialStore()
 	mgr := NewOAuthManager(
 		[]ServerConfig{oauthTestServerConfig("coralogix", provider.URL)},
-		OAuthOptions{PublicBaseURL: "https://faultline.example.com", CallbackPath: "/oauth/callback", StateTTL: time.Minute},
+		OAuthOptions{PublicBaseURL: "https://openharness.example.com", CallbackPath: "/oauth/callback", StateTTL: time.Minute},
 		store,
 		provider.Client(),
 	)
@@ -108,7 +108,7 @@ func TestOAuthManagerAccessTokenRefreshesExpiredCredential(t *testing.T) {
 	}
 	mgr := NewOAuthManager(
 		[]ServerConfig{oauthTestServerConfig("coralogix", provider.URL)},
-		OAuthOptions{PublicBaseURL: "https://faultline.example.com", StateTTL: time.Minute},
+		OAuthOptions{PublicBaseURL: "https://openharness.example.com", StateTTL: time.Minute},
 		store,
 		provider.Client(),
 	)
@@ -145,7 +145,7 @@ func TestOAuthManagerStartDiscoversProtectedResourceAndRegistersClient(t *testin
 	}
 	mgr := NewOAuthManager(
 		[]ServerConfig{server},
-		OAuthOptions{PublicBaseURL: "https://faultline.example.com", CallbackPath: "/oauth/callback", StateTTL: time.Minute},
+		OAuthOptions{PublicBaseURL: "https://openharness.example.com", CallbackPath: "/oauth/callback", StateTTL: time.Minute},
 		store,
 		provider.Client(),
 	)
@@ -193,7 +193,7 @@ func TestOAuthManagerStartPrefersConfiguredScopesOverDiscoveredScopes(t *testing
 	}
 	mgr := NewOAuthManager(
 		[]ServerConfig{server},
-		OAuthOptions{PublicBaseURL: "https://faultline.example.com", CallbackPath: "/oauth/callback", StateTTL: time.Minute},
+		OAuthOptions{PublicBaseURL: "https://openharness.example.com", CallbackPath: "/oauth/callback", StateTTL: time.Minute},
 		newMemoryCredentialStore(),
 		provider.Client(),
 	)
@@ -261,7 +261,7 @@ func oauthTestServerConfig(name, issuer string) ServerConfig {
 			Type:          "oauth_authorization_code",
 			CredentialRef: "mcp/" + name,
 			Issuer:        issuer,
-			ClientID:      "faultline",
+			ClientID:      "openharness",
 			Scopes:        []string{"openid", "offline_access"},
 		},
 	}
@@ -308,7 +308,7 @@ func newOAuthProvider(t *testing.T) *httptest.Server {
 			http.Error(w, "bad json", http.StatusBadRequest)
 			return
 		}
-		if len(req.RedirectURIs) != 1 || req.RedirectURIs[0] != "https://faultline.example.com/oauth/callback" {
+		if len(req.RedirectURIs) != 1 || req.RedirectURIs[0] != "https://openharness.example.com/oauth/callback" {
 			t.Errorf("redirect_uris = %#v", req.RedirectURIs)
 		}
 		_ = json.NewEncoder(w).Encode(map[string]string{"client_id": "registered-client"})

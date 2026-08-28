@@ -233,7 +233,7 @@ func (c *HTTPClient) initialize(ctx context.Context, server ServerConfig) (sessi
 		"protocolVersion": defaultProtocolVersion,
 		"capabilities":    map[string]any{},
 		"clientInfo": map[string]any{
-			"name":    "faultline",
+			"name":    "openharness",
 			"version": "dev",
 		},
 	})

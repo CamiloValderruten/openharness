@@ -145,7 +145,7 @@ func TestHTTPClientCallToolSendsToolsCallRequest(t *testing.T) {
 		if params.Name != "search_repositories" {
 			t.Fatalf("params.name = %q, want search_repositories", params.Name)
 		}
-		if string(params.Arguments) != `{"query":"faultline"}` {
+		if string(params.Arguments) != `{"query":"openharness"}` {
 			t.Fatalf("params.arguments = %s, want original arguments", params.Arguments)
 		}
 
@@ -169,7 +169,7 @@ func TestHTTPClientCallToolSendsToolsCallRequest(t *testing.T) {
 		},
 	}, server.Client())
 
-	result, err := client.CallTool(context.Background(), "github", "search_repositories", json.RawMessage(`{"query":"faultline"}`))
+	result, err := client.CallTool(context.Background(), "github", "search_repositories", json.RawMessage(`{"query":"openharness"}`))
 	if err != nil {
 		t.Fatalf("CallTool: %v", err)
 	}
@@ -356,7 +356,7 @@ data: {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"stream
 		{Name: "github", Transport: "http", URL: server.URL},
 	}, server.Client())
 
-	result, err := client.CallTool(context.Background(), "github", "search_repositories", json.RawMessage(`{"query":"faultline"}`))
+	result, err := client.CallTool(context.Background(), "github", "search_repositories", json.RawMessage(`{"query":"openharness"}`))
 	if err != nil {
 		t.Fatalf("CallTool: %v", err)
 	}
@@ -391,7 +391,7 @@ func TestHTTPClientParsesLargeStreamableHTTPSSEDataLine(t *testing.T) {
 		{Name: "github", Transport: "http", URL: server.URL},
 	}, server.Client())
 
-	result, err := client.CallTool(context.Background(), "github", "search_repositories", json.RawMessage(`{"query":"faultline"}`))
+	result, err := client.CallTool(context.Background(), "github", "search_repositories", json.RawMessage(`{"query":"openharness"}`))
 	if err != nil {
 		t.Fatalf("CallTool: %v", err)
 	}
@@ -485,7 +485,7 @@ func TestHTTPClientSerializesConcurrentSessionInitialization(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			_, err := client.CallTool(context.Background(), "github", "search_repositories", json.RawMessage(`{"query":"faultline"}`))
+			_, err := client.CallTool(context.Background(), "github", "search_repositories", json.RawMessage(`{"query":"openharness"}`))
 			errs <- err
 		}()
 	}
@@ -536,7 +536,7 @@ func TestHTTPClientReinitializesWhenSessionExpires(t *testing.T) {
 		{Name: "github", Transport: "http", URL: server.URL},
 	}, server.Client())
 
-	result, err := client.CallTool(context.Background(), "github", "search_repositories", json.RawMessage(`{"query":"faultline"}`))
+	result, err := client.CallTool(context.Background(), "github", "search_repositories", json.RawMessage(`{"query":"openharness"}`))
 	if err != nil {
 		t.Fatalf("CallTool: %v", err)
 	}

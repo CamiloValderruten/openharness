@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	skillsfs "github.com/CamiloValderruten/faultline/internal/adapters/skills/fs"
+	skillsfs "github.com/CamiloValderruten/openharness/internal/adapters/skills/fs"
 )
 
 // fakeSkillsAdmin lets the fragment + toggle handlers be exercised

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/CamiloValderruten/faultline/internal/messaging"
+	"github.com/CamiloValderruten/openharness/internal/messaging"
 	tgmd "github.com/Mad-Pixels/goldmark-tgmd"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )

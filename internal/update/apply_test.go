@@ -22,11 +22,11 @@ func TestExtractBinary(t *testing.T) {
 	writeTarball(t, tarPath, map[string][]byte{
 		"LICENSE":             []byte("license text"),
 		"README.md":           []byte("readme"),
-		"faultline":           wantContent,
+		"openharness":         wantContent,
 		"config.example.toml": []byte("# example"),
 	})
 
-	outPath := filepath.Join(dir, "faultline.new")
+	outPath := filepath.Join(dir, "openharness.new")
 	if err := extractBinary(tarPath, outPath); err != nil {
 		t.Fatal(err)
 	}
@@ -55,8 +55,8 @@ func TestExtractBinary_MissingBinary(t *testing.T) {
 }
 
 func TestFetchExpectedSum(t *testing.T) {
-	body := `abc123def456  faultline_1.0.0_linux_x86_64.tar.gz
-fedcba654321  faultline_1.0.0_linux_arm64.tar.gz
+	body := `abc123def456  openharness_1.0.0_linux_x86_64.tar.gz
+fedcba654321  openharness_1.0.0_linux_arm64.tar.gz
 `
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(body))
@@ -66,7 +66,7 @@ fedcba654321  faultline_1.0.0_linux_arm64.tar.gz
 	gh := newGitHubClient("o/r")
 	gh.apiBase = srv.URL
 
-	got, err := fetchExpectedSum(t.Context(), gh, srv.URL, "faultline_1.0.0_linux_arm64.tar.gz")
+	got, err := fetchExpectedSum(t.Context(), gh, srv.URL, "openharness_1.0.0_linux_arm64.tar.gz")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -10,7 +10,7 @@
   {{if not .HasConfig}}
   <div class="alert alert-warning">
     <span>The configuration store is not wired into the admin server.
-      Check <code>cmd/faultline/admin.go</code>.</span>
+      Check <code>cmd/openharness/admin.go</code>.</span>
   </div>
   {{else if .ReadErr}}
   <div class="alert alert-error">
@@ -97,7 +97,7 @@
       // Persist the active tab across navigations within this
       // browser session so a save → re-render keeps the operator
       // on the section they were just editing.
-      var key = "faultline.cfgtab";
+      var key = "openharness.cfgtab";
       function activate(name) {
         var matched = false;
         tabs.forEach(function (t) {

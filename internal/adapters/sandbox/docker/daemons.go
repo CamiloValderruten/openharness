@@ -14,12 +14,12 @@ import (
 )
 
 const (
-	labelDaemon          = "faultline.daemon"
-	labelOwner           = "faultline.owner"
-	labelDaemonID        = "faultline.daemon.id"
-	labelDaemonName      = "faultline.daemon.name"
-	labelDaemonDesc      = "faultline.daemon.description"
-	labelDaemonCreatedAt = "faultline.daemon.created_at"
+	labelDaemon          = "openharness.daemon"
+	labelOwner           = "openharness.owner"
+	labelDaemonID        = "openharness.daemon.id"
+	labelDaemonName      = "openharness.daemon.name"
+	labelDaemonDesc      = "openharness.daemon.description"
+	labelDaemonCreatedAt = "openharness.daemon.created_at"
 
 	daemonOwnerFile           = ".daemon-owner"
 	maxDaemonDescriptionRunes = 512
@@ -134,7 +134,7 @@ func (s *Sandbox) daemonRunArgs(containerName, owner, id, name, description, cre
 	return args
 }
 
-// StartDaemon starts a detached container that survives Faultline and
+// StartDaemon starts a detached container that survives OpenHarness and
 // host restarts (--restart unless-stopped). command must reference a
 // flat file under /scripts/.
 func (s *Sandbox) StartDaemon(ctx context.Context, name, description string, command []string, env map[string]string) (DaemonInfo, error) {
@@ -182,7 +182,7 @@ func (s *Sandbox) StartDaemon(ctx context.Context, name, description string, com
 	if len(shortOwner) > 8 {
 		shortOwner = shortOwner[:8]
 	}
-	containerName := fmt.Sprintf("faultline-daemon-%s-%s", shortOwner, id)
+	containerName := fmt.Sprintf("openharness-daemon-%s-%s", shortOwner, id)
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	workHost := filepath.Join(s.dir, "daemons", id)
 	if err := os.MkdirAll(workHost, 0o755); err != nil {

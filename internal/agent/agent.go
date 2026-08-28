@@ -1,7 +1,7 @@
 // Package agent is the hexagon: the autonomous agent loop, context
 // compaction, idle-loop detection, and graceful shutdown logic. It
 // depends only on ports defined in this package; concrete adapter
-// implementations are wired up in cmd/faultline/main.go.
+// implementations are wired up in cmd/openharness/main.go.
 package agent
 
 import (
@@ -13,17 +13,17 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/llm/kobold"
-	"github.com/CamiloValderruten/faultline/internal/adapters/memory/fs"
-	"github.com/CamiloValderruten/faultline/internal/config"
-	daemonpkg "github.com/CamiloValderruten/faultline/internal/daemon"
-	"github.com/CamiloValderruten/faultline/internal/llm"
-	"github.com/CamiloValderruten/faultline/internal/peer"
-	prompt "github.com/CamiloValderruten/faultline/internal/prompts"
-	"github.com/CamiloValderruten/faultline/internal/schedule"
-	"github.com/CamiloValderruten/faultline/internal/search/bm25"
-	skillsdomain "github.com/CamiloValderruten/faultline/internal/skills"
-	"github.com/CamiloValderruten/faultline/internal/subagent"
+	"github.com/CamiloValderruten/openharness/internal/adapters/llm/kobold"
+	"github.com/CamiloValderruten/openharness/internal/adapters/memory/fs"
+	"github.com/CamiloValderruten/openharness/internal/config"
+	daemonpkg "github.com/CamiloValderruten/openharness/internal/daemon"
+	"github.com/CamiloValderruten/openharness/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/peer"
+	prompt "github.com/CamiloValderruten/openharness/internal/prompts"
+	"github.com/CamiloValderruten/openharness/internal/schedule"
+	"github.com/CamiloValderruten/openharness/internal/search/bm25"
+	skillsdomain "github.com/CamiloValderruten/openharness/internal/skills"
+	"github.com/CamiloValderruten/openharness/internal/subagent"
 )
 
 // Agent is the autonomous agent that runs in a continuous loop.
@@ -477,7 +477,7 @@ func (a *Agent) Run(ctx context.Context, shutdownCh <-chan struct{}) error {
 		}
 
 		// Subagents: enforce the per-run turn cap. The spawnFn closure
-		// in cmd/faultline/main.go inspects whether the report was
+		// in cmd/openharness/main.go inspects whether the report was
 		// delivered to decide whether to mark the result truncated.
 		if a.maxTurns > 0 && turn >= a.maxTurns {
 			a.logger.Warn("agent: max turns reached, exiting Run loop",

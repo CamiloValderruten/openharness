@@ -2,7 +2,7 @@
 
 ## Why
 
-Faultline now wraps tool output that contains content not under our
+OpenHarness now wraps tool output that contains content not under our
 control (web pages, wiki extracts, sandbox stdout, skill output, email
 bodies, etc.) with explicit BEGIN/END markers and a "treat as data"
 header. Your system prompt (`prompts/system.md`) needs a section

@@ -130,7 +130,7 @@ func (c *githubClient) getRelease(ctx context.Context, path string) (*Release, e
 	// Pin to v3 (current stable) explicitly; future-proofing.
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
-	req.Header.Set("User-Agent", "faultline-updater")
+	req.Header.Set("User-Agent", "openharness-updater")
 
 	resp, err := c.http.Do(req)
 	if err != nil {
@@ -176,7 +176,7 @@ func (c *githubClient) download(ctx context.Context, url string, out io.Writer) 
 		return fmt.Errorf("build request: %w", err)
 	}
 	req.Header.Set("Accept", "application/octet-stream")
-	req.Header.Set("User-Agent", "faultline-updater")
+	req.Header.Set("User-Agent", "openharness-updater")
 
 	resp, err := c.http.Do(req)
 	if err != nil {

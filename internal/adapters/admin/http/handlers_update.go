@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/update"
+	"github.com/CamiloValderruten/openharness/internal/update"
 )
 
 // fragUpdateData backs frag_update.html. The fields all derive from

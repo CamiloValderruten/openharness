@@ -1,4 +1,4 @@
-# Faultline-patched discordgo
+# OpenHarness-patched discordgo
 
 Vendored replace for `github.com/bwmarrin/discordgo` (yeongaori DAVE fork base).
 

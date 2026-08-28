@@ -11,7 +11,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/CamiloValderruten/faultline/internal/messaging"
+	"github.com/CamiloValderruten/openharness/internal/messaging"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pion/webrtc/v3/pkg/media/oggreader"
 )

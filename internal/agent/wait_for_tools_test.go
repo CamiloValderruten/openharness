@@ -6,9 +6,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/CamiloValderruten/faultline/internal/config"
-	"github.com/CamiloValderruten/faultline/internal/daemon"
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/daemon"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 // afterFirstChatOperator returns a collaborator message only after Chat has

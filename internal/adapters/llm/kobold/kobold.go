@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 // Client provides access to KoboldCpp-specific endpoints that sit

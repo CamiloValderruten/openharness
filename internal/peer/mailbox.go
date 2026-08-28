@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// Agent is a known remote Faultline peer.
+// Agent is a known remote OpenHarness peer.
 type Agent struct {
 	Name  string
 	URL   string

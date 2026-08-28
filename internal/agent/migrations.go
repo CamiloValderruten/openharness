@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
-	prompt "github.com/CamiloValderruten/faultline/internal/prompts"
-	skillsdomain "github.com/CamiloValderruten/faultline/internal/skills"
-	"github.com/CamiloValderruten/faultline/internal/subagent"
+	"github.com/CamiloValderruten/openharness/internal/llm"
+	prompt "github.com/CamiloValderruten/openharness/internal/prompts"
+	skillsdomain "github.com/CamiloValderruten/openharness/internal/skills"
+	"github.com/CamiloValderruten/openharness/internal/subagent"
 )
 
 // Prompt-migration runner. Called once at startup, between
@@ -254,7 +254,7 @@ func buildMigrationUserPrompt(m prompt.Migration) string {
 	fmt.Fprintf(&sb, "[Prompt migration %03d — %s]\n\n", m.ID, m.Slug)
 	sb.WriteString(
 		"You are being asked to apply a one-time prompt update shipped " +
-			"with this faultline release. Read the instructions below carefully, " +
+			"with this openharness release. Read the instructions below carefully, " +
 			"perform the requested edits using your normal memory tools, and " +
 			"verify the result. When you are done, reply with a single short " +
 			"text-only message describing what you did — that signals completion " +

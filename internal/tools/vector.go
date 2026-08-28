@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/memory/fs"
-	"github.com/CamiloValderruten/faultline/internal/search/vector"
+	"github.com/CamiloValderruten/openharness/internal/adapters/memory/fs"
+	"github.com/CamiloValderruten/openharness/internal/search/vector"
 )
 
 // Embedder is the consumer-side contract for an embeddings backend.

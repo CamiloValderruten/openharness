@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/publish"
-	"github.com/CamiloValderruten/faultline/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/adapters/publish"
+	"github.com/CamiloValderruten/openharness/internal/config"
 )
 
 // publishServer wraps the HTML publishing harness listener. Nil-safe

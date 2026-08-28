@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/mcp"
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/adapters/mcp"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 func TestToolDefsAdvertisesOnlyAllowlistedMCPTools(t *testing.T) {
@@ -99,7 +99,7 @@ func TestExecuteRoutesAllowlistedMCPToolCall(t *testing.T) {
 	got := te.Execute(context.Background(), llm.ToolCall{
 		Function: llm.FunctionCall{
 			Name:      "mcp_github_search_repositories",
-			Arguments: `{"query":"faultline"}`,
+			Arguments: `{"query":"openharness"}`,
 		},
 	})
 
@@ -112,7 +112,7 @@ func TestExecuteRoutesAllowlistedMCPToolCall(t *testing.T) {
 	if caller.toolName != "search_repositories" {
 		t.Fatalf("toolName = %q, want search_repositories", caller.toolName)
 	}
-	if string(caller.args) != `{"query":"faultline"}` {
+	if string(caller.args) != `{"query":"openharness"}` {
 		t.Fatalf("args = %s, want original arguments", caller.args)
 	}
 }
@@ -141,7 +141,7 @@ func TestExecuteRejectsUnallowlistedMCPToolCall(t *testing.T) {
 	got := te.Execute(context.Background(), llm.ToolCall{
 		Function: llm.FunctionCall{
 			Name:      "mcp_github_delete_repository",
-			Arguments: `{"repo":"faultline"}`,
+			Arguments: `{"repo":"openharness"}`,
 		},
 	})
 
@@ -585,7 +585,7 @@ func testOAuthMCPDiscovered() []mcp.DiscoveredServer {
 					CredentialRef:    "mcp/coralogix",
 					AuthorizationURL: "https://auth.example.com/authorize",
 					TokenURL:         "https://auth.example.com/token",
-					ClientID:         "faultline",
+					ClientID:         "openharness",
 				},
 			},
 		},
@@ -596,7 +596,7 @@ func testOAuthManager(t *testing.T) *mcp.OAuthManager {
 	t.Helper()
 	return mcp.NewOAuthManager(
 		[]mcp.ServerConfig{testOAuthMCPDiscovered()[0].Server},
-		mcp.OAuthOptions{PublicBaseURL: "https://faultline.example.com"},
+		mcp.OAuthOptions{PublicBaseURL: "https://openharness.example.com"},
 		mcp.NewFileCredentialStore(filepath.Join(t.TempDir(), "oauth-tokens.json")),
 		nil,
 	)

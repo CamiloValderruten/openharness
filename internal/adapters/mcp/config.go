@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 // Config is the dedicated MCP server config file shape.
@@ -131,7 +131,7 @@ type DiscoveredServer struct {
 	DiscoveryError string           `json:"discovery_error,omitempty"`
 }
 
-// ResolvedTool maps a Faultline-prefixed tool name back to its MCP origin.
+// ResolvedTool maps a OpenHarness-prefixed tool name back to its MCP origin.
 type ResolvedTool struct {
 	ServerName string
 	ToolName   string
@@ -311,7 +311,7 @@ func (c ServerConfig) runtimeNotes() []string {
 	}
 }
 
-// ToolDefs converts discovered MCP metadata into callable Faultline tools.
+// ToolDefs converts discovered MCP metadata into callable OpenHarness tools.
 // Only exact allow_tools matches are exposed; unallowlisted tools remain
 // visible through discovery/status output but are not callable.
 func ToolDefs(discovered []DiscoveredServer) []llm.Tool {
@@ -343,7 +343,7 @@ func ToolDefs(discovered []DiscoveredServer) []llm.Tool {
 	return defs
 }
 
-// ResolveToolName maps a Faultline-prefixed MCP tool name back to the original
+// ResolveToolName maps a OpenHarness-prefixed MCP tool name back to the original
 // server and MCP tool name, but only when it corresponds to an allowlisted
 // discovered tool.
 func ResolveToolName(discovered []DiscoveredServer, name string) (ResolvedTool, bool) {

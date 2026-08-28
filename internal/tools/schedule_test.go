@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
-	"github.com/CamiloValderruten/faultline/internal/schedule"
+	"github.com/CamiloValderruten/openharness/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/schedule"
 )
 
 func TestToolDefsAdvertisesScheduleToolsWhenConfigured(t *testing.T) {

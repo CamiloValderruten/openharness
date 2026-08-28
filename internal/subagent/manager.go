@@ -15,7 +15,7 @@ import (
 // primary agent drains alongside operator messages.
 //
 // Lifecycle:
-//   - constructed once in cmd/faultline/main.go with the operator's
+//   - constructed once in cmd/openharness/main.go with the operator's
 //     [subagent] config, the synthesized default profile, and a
 //     SpawnFunc that knows how to construct + run a child agent.
 //   - the agent loop calls Pending() / HasPending() to drain async

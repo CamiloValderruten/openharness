@@ -1,4 +1,4 @@
-// Faultline admin login background: classic Matrix katakana rain.
+// OpenHarness admin login background: classic Matrix katakana rain.
 //
 // Self-contained (no dependencies). Activates only on a canvas with
 // id="matrix-rain"; if no such element exists the script is a no-op.

@@ -16,7 +16,7 @@ import (
 //
 // where amd64 is rewritten to x86_64 to match the Linux convention.
 func AssetName(version string) string {
-	return fmt.Sprintf("faultline_%s_%s_%s.tar.gz", version, runtime.GOOS, archLabel(runtime.GOARCH))
+	return fmt.Sprintf("openharness_%s_%s_%s.tar.gz", version, runtime.GOOS, archLabel(runtime.GOARCH))
 }
 
 // archLabel maps a Go GOARCH value to the label goreleaser writes into

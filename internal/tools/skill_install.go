@@ -19,9 +19,9 @@ import (
 	"strings"
 	"time"
 
-	skillsfs "github.com/CamiloValderruten/faultline/internal/adapters/skills/fs"
-	"github.com/CamiloValderruten/faultline/internal/llm"
-	"github.com/CamiloValderruten/faultline/internal/skills"
+	skillsfs "github.com/CamiloValderruten/openharness/internal/adapters/skills/fs"
+	"github.com/CamiloValderruten/openharness/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/skills"
 )
 
 // Install caps. The agent should never need to fetch a skill larger
@@ -30,7 +30,7 @@ import (
 const (
 	skillInstallMaxBytes  = 50 * 1024 * 1024 // 50 MiB
 	skillInstallTimeout   = 5 * time.Minute  // covers slow git clones over poor links
-	skillInstallUserAgent = "faultline-skill-install/1"
+	skillInstallUserAgent = "openharness-skill-install/1"
 )
 
 // Recognized tarball/zip extensions. Order matters: longest suffixes
@@ -435,7 +435,7 @@ func downloadAndExtractZip(ctx context.Context, client *http.Client, source, dst
 
 	// archive/zip needs a ReaderAt; buffer to a temp file rather than
 	// memory so a large-but-legal zip doesn't blow up RSS.
-	tmp, err := os.CreateTemp("", "faultline-zip-*.zip")
+	tmp, err := os.CreateTemp("", "openharness-zip-*.zip")
 	if err != nil {
 		return fmt.Errorf("buffer zip: %w", err)
 	}

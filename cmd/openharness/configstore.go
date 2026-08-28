@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/CamiloValderruten/faultline/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/config"
 )
 
 // fileConfigStore satisfies adminhttp.ConfigStore by reading and
@@ -59,11 +59,11 @@ func (f *fileConfigStore) Read() ([]byte, error) {
 // values before they hit disk.
 func (f *fileConfigStore) Validate(raw []byte) error {
 	dir := filepath.Dir(f.path)
-	tmp, err := os.CreateTemp(dir, ".faultline-config-validate-*.toml")
+	tmp, err := os.CreateTemp(dir, ".openharness-config-validate-*.toml")
 	if err != nil {
 		// Fall back to system temp dir if the config dir isn't
 		// writable; we still want validation to work.
-		tmp, err = os.CreateTemp("", ".faultline-config-validate-*.toml")
+		tmp, err = os.CreateTemp("", ".openharness-config-validate-*.toml")
 		if err != nil {
 			return fmt.Errorf("create temp file: %w", err)
 		}
@@ -93,7 +93,7 @@ func (f *fileConfigStore) Write(raw []byte) error {
 	defer f.mu.Unlock()
 
 	dir := filepath.Dir(f.path)
-	tmp, err := os.CreateTemp(dir, ".faultline-config-*.tmp")
+	tmp, err := os.CreateTemp(dir, ".openharness-config-*.tmp")
 	if err != nil {
 		return fmt.Errorf("create temp file: %w", err)
 	}

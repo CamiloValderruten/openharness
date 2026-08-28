@@ -1,8 +1,8 @@
-# Faultline Sandbox Image
+# OpenHarness Sandbox Image
 
-Multi-runtime execution image for the Faultline agent's sandbox tools.
+Multi-runtime execution image for the OpenHarness agent's sandbox tools.
 
-Published as `ghcr.io/camilovalderruten/faultline-sandbox` by the
+Published as `ghcr.io/camilovalderruten/openharness-sandbox` by the
 `.github/workflows/sandbox-image.yml` workflow.
 
 ## What's inside
@@ -48,7 +48,7 @@ tool.
 ## Building locally
 
 ```sh
-docker build -t faultline-sandbox:dev docker/sandbox
+docker build -t openharness-sandbox:dev docker/sandbox
 ```
 
 Then point `config.toml` at it:
@@ -56,13 +56,13 @@ Then point `config.toml` at it:
 ```toml
 [sandbox]
 enabled = true
-image = "faultline-sandbox:dev"
+image = "openharness-sandbox:dev"
 ```
 
 ## Smoke test
 
 ```sh
-docker run --rm faultline-sandbox:dev bash -c '
+docker run --rm openharness-sandbox:dev bash -c '
   uv --version
   uvx --version
   python --version

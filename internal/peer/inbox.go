@@ -1,4 +1,4 @@
-// Package peer implements a pull-only mailbox for cross-process Faultline
+// Package peer implements a pull-only mailbox for cross-process OpenHarness
 // agents. Incoming messages are stored on disk and never injected into the
 // agent loop — the model spends tokens only when it calls peer_* tools.
 package peer

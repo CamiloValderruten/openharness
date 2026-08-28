@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/adapters/auth/users"
+	"github.com/CamiloValderruten/openharness/internal/adapters/auth/users"
 )
 
 // loginData drives the login template.
@@ -186,7 +186,7 @@ func classify(err error) string {
 // learn the value and the "form must echo cookie" check still does
 // the work.
 
-const loginCSRFCookie = "faultline_login_csrf"
+const loginCSRFCookie = "openharness_login_csrf"
 
 const loginCSRFTTL = 10 * time.Minute
 

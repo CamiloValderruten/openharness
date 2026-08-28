@@ -1,19 +1,19 @@
-# Faultline example configuration.
+# OpenHarness example configuration.
 #
 # Copy this file to config.toml (or another path passed via -config) and edit
 # for your deployment. All sections are optional; missing fields fall back to
 # the defaults documented inline below.
 #
-# Run as:    ./faultline -config /path/to/config.toml
+# Run as:    ./openharness -config /path/to/config.toml
 
 # ---------------------------------------------------------------------------
 # [api] — LLM backend connection.
 #
-# Faultline targets any OpenAI-compatible /v1/chat/completions endpoint.
+# OpenHarness targets any OpenAI-compatible /v1/chat/completions endpoint.
 # Tested with KoboldCpp, llama.cpp's openai bridge, vLLM, and real OpenAI.
 # ---------------------------------------------------------------------------
 [api]
-# Base URL including the version prefix. Faultline appends /chat/completions.
+# Base URL including the version prefix. OpenHarness appends /chat/completions.
 url = "http://localhost:5001/v1"
 
 # Bearer token. Leave empty for backends that don't require auth.
@@ -144,7 +144,7 @@ dir = "./logs"
 # in ephemeral Docker containers (one container per operation). Requires
 # Docker in PATH.
 #
-# The default image is Faultline's own multi-runtime image (Debian-based;
+# The default image is OpenHarness's own multi-runtime image (Debian-based;
 # ships uv/uvx, python+pip, node+npm+npx, bun, deno, go, plus common CLI
 # tools like curl, jq, ripgrep, fd, git, gh). sandbox_execute drives Python
 # via uv; sandbox_shell can drive any of the other runtimes directly.
@@ -156,7 +156,7 @@ enabled = false
 # instead of :latest if you want a specific image version locked down for
 # a deployment. The image is published from docker/sandbox/Dockerfile by
 # the sandbox-image GitHub Actions workflow.
-image = "ghcr.io/camilovalderruten/faultline-sandbox:latest"
+image = "ghcr.io/camilovalderruten/openharness-sandbox:latest"
 
 # Sandbox working directory on the host. Subdirs are auto-created for scripts/,
 # input/, output/, venv/ (Python), node/ (Node), mcp/ (stdio MCP), and cache/.
@@ -186,9 +186,9 @@ memory_limit = "512m"
 # ---------------------------------------------------------------------------
 # [daemons] — long-lived Docker daemons owned by this agent.
 #
-# Requires [sandbox] enabled. On first enable, Faultline writes a UUID to
-# sandbox/.daemon-owner and labels containers with faultline.owner=<uuid>
-# so daemon_list rediscovers them after Faultline exits or host reboots.
+# Requires [sandbox] enabled. On first enable, OpenHarness writes a UUID to
+# sandbox/.daemon-owner and labels containers with openharness.owner=<uuid>
+# so daemon_list rediscovers them after OpenHarness exits or host reboots.
 # Containers use --restart unless-stopped. Commands may only run flat
 # scripts under /scripts/.
 # ---------------------------------------------------------------------------
@@ -234,7 +234,7 @@ enabled = false
 check_interval = "1h"
 
 # "owner/name" of the GitHub repository whose releases we poll.
-github_repo = "CamiloValderruten/faultline"
+github_repo = "CamiloValderruten/openharness"
 
 # What to do after a successful update applies. Options:
 #   "exit"      - save state and os.Exit(0). Suitable for any process
@@ -244,7 +244,7 @@ github_repo = "CamiloValderruten/faultline"
 #   "self-exec" - save state and syscall.Exec the new binary, replacing
 #                 the current process image. Same PID. Use this when
 #                 running bare without a supervisor (tmux, screen,
-#                 manual ./faultline run).
+#                 manual ./openharness run).
 #   "command"   - save state, run restart_command (split on whitespace,
 #                 detached), then exit. For custom orchestrators.
 restart_mode = "exit"
@@ -295,7 +295,7 @@ stdio_idle_timeout = "10m"
 #
 # Telegram-driven OAuth setup needs a callback URL that the operator's browser
 # can reach. Loopback (http://127.0.0.1:8742) only works when the browser is on
-# the same machine as Faultline. For phone-based Telegram setup and Kubernetes,
+# the same machine as OpenHarness. For phone-based Telegram setup and Kubernetes,
 # set public_base_url to a public HTTPS URL (or a tunnel URL in local dev).
 #
 # OAuth tokens are stored outside mcp.json. The first backend is a local
@@ -392,7 +392,7 @@ batch_size = 100
 # ---------------------------------------------------------------------------
 # [skills] — Agent Skills support (https://agentskills.io).
 #
-# When enabled, Faultline scans <dir>/<skill-name>/SKILL.md at startup and
+# When enabled, OpenHarness scans <dir>/<skill-name>/SKILL.md at startup and
 # on every context rebuild, injects each skill's name + description into
 # the system prompt's "Available Skills" section, and advertises four
 # tools to the LLM: skill_activate (load full instructions), skill_read
@@ -499,7 +499,7 @@ run_timeout = "30m"
 # purpose = "Deep research, architecture analysis, careful reasoning. Slow."
 
 # ---------------------------------------------------------------------------
-# [peers] — messaging between Faultline processes.
+# [peers] — messaging between OpenHarness processes.
 #
 # When enabled, this process binds a small HTTP listener (separate from
 # [admin]) that accepts POSTs into a disk inbox.

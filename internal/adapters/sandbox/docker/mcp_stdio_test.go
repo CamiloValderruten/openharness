@@ -8,32 +8,32 @@ import (
 
 func TestMCPStdioArgsUseRegularSandboxMounts(t *testing.T) {
 	s := &Sandbox{
-		dir:         "/tmp/faultline/sandbox",
-		image:       "faultline-sandbox",
+		dir:         "/tmp/openharness/sandbox",
+		image:       "openharness-sandbox",
 		memoryLimit: "128m",
 		uid:         1000,
 		gid:         1000,
 	}
 
-	args := s.mcpStdioArgs("faultline-mcp-test", "/mcp/nerdoracle", map[string]string{
+	args := s.mcpStdioArgs("openharness-mcp-test", "/mcp/nerdoracle", map[string]string{
 		"NERDORACLE_API_URL": "https://example.invalid",
 	}, "npx", []string{"ts-node", "src/index.ts"})
 	joined := strings.Join(args, "\x00")
 
 	for _, want := range []string{
 		"run", "--rm", "-i",
-		"--name\x00faultline-mcp-test",
+		"--name\x00openharness-mcp-test",
 		"-w\x00/mcp/nerdoracle",
 		"--memory\x00128m",
 		"--user\x001000:1000",
 		"--security-opt\x00no-new-privileges",
-		"-v\x00/tmp/faultline/sandbox/scripts:/scripts:ro",
-		"-v\x00/tmp/faultline/sandbox/input:/input:ro",
-		"-v\x00/tmp/faultline/sandbox/output:/output:rw",
-		"-v\x00/tmp/faultline/sandbox/venv:/venv:rw",
-		"-v\x00/tmp/faultline/sandbox/node:/node:rw",
-		"-v\x00/tmp/faultline/sandbox/mcp:/mcp:rw",
-		"-v\x00/tmp/faultline/sandbox/cache:/cache:rw",
+		"-v\x00/tmp/openharness/sandbox/scripts:/scripts:ro",
+		"-v\x00/tmp/openharness/sandbox/input:/input:ro",
+		"-v\x00/tmp/openharness/sandbox/output:/output:rw",
+		"-v\x00/tmp/openharness/sandbox/venv:/venv:rw",
+		"-v\x00/tmp/openharness/sandbox/node:/node:rw",
+		"-v\x00/tmp/openharness/sandbox/mcp:/mcp:rw",
+		"-v\x00/tmp/openharness/sandbox/cache:/cache:rw",
 		"--network=none",
 		"-e\x00NERDORACLE_API_URL=https://example.invalid",
 		"-e\x00npm_config_cache=/cache/npm",
@@ -41,7 +41,7 @@ func TestMCPStdioArgsUseRegularSandboxMounts(t *testing.T) {
 		"-e\x00XDG_CACHE_HOME=/cache",
 		"-e\x00UV_PROJECT_ENVIRONMENT=/venv",
 		"-e\x00PATH=/node/node_modules/.bin:/usr/local/bin:/usr/bin:/bin",
-		"faultline-sandbox\x00npx\x00ts-node\x00src/index.ts",
+		"openharness-sandbox\x00npx\x00ts-node\x00src/index.ts",
 	} {
 		if !strings.Contains(joined, want) {
 			t.Fatalf("docker args missing %q in %v", want, args)
@@ -54,28 +54,28 @@ func TestMCPStdioArgsUseRegularSandboxMounts(t *testing.T) {
 
 func TestMCPStdioArgsUsesSandboxNetworkSetting(t *testing.T) {
 	s := &Sandbox{
-		dir:         "/tmp/faultline/sandbox",
-		image:       "faultline-sandbox",
+		dir:         "/tmp/openharness/sandbox",
+		image:       "openharness-sandbox",
 		memoryLimit: "128m",
 		uid:         1000,
 		gid:         1000,
 		network:     true,
 	}
 
-	args := s.mcpStdioArgs("faultline-mcp-test", "/mcp/atlassian", nil, "npx", []string{"-y", "@atlassian/mcp"})
+	args := s.mcpStdioArgs("openharness-mcp-test", "/mcp/atlassian", nil, "npx", []string{"-y", "@atlassian/mcp"})
 	if strings.Contains(strings.Join(args, "\x00"), "--network=none") {
 		t.Fatalf("docker args should inherit enabled sandbox networking: %v", args)
 	}
 }
 
 func TestMCPStdioHostWorkDirMapsOnlyMCPPaths(t *testing.T) {
-	s := &Sandbox{dir: "/tmp/faultline/sandbox"}
+	s := &Sandbox{dir: "/tmp/openharness/sandbox"}
 
 	got, err := s.mcpStdioHostWorkDir("/mcp/playwright")
 	if err != nil {
 		t.Fatalf("mcpStdioHostWorkDir: %v", err)
 	}
-	if got != filepath.Join("/tmp/faultline/sandbox", "mcp", "playwright") {
+	if got != filepath.Join("/tmp/openharness/sandbox", "mcp", "playwright") {
 		t.Fatalf("host workdir = %q", got)
 	}
 
@@ -87,13 +87,13 @@ func TestMCPStdioHostWorkDirMapsOnlyMCPPaths(t *testing.T) {
 }
 
 func TestMCPStdioDefaultWorkDirUsesMCPRoot(t *testing.T) {
-	s := &Sandbox{dir: "/tmp/faultline/sandbox"}
+	s := &Sandbox{dir: "/tmp/openharness/sandbox"}
 
 	got, err := s.mcpStdioHostWorkDir("/mcp/playwright")
 	if err != nil {
 		t.Fatalf("mcpStdioHostWorkDir: %v", err)
 	}
-	if got != filepath.Join("/tmp/faultline/sandbox", "mcp", "playwright") {
+	if got != filepath.Join("/tmp/openharness/sandbox", "mcp", "playwright") {
 		t.Fatalf("host workdir = %q", got)
 	}
 	if _, err := s.mcpStdioHostWorkDir("/mcp/../output"); err == nil {
@@ -103,14 +103,14 @@ func TestMCPStdioDefaultWorkDirUsesMCPRoot(t *testing.T) {
 
 func TestDockerArgsSetWritableNodeCache(t *testing.T) {
 	s := &Sandbox{
-		dir:         "/tmp/faultline/sandbox",
-		image:       "faultline-sandbox",
+		dir:         "/tmp/openharness/sandbox",
+		image:       "openharness-sandbox",
 		memoryLimit: "128m",
 		uid:         1000,
 		gid:         1000,
 	}
 
-	args := s.dockerArgs(false, "faultline-sandbox-test")
+	args := s.dockerArgs(false, "openharness-sandbox-test")
 	joined := strings.Join(args, "\x00")
 	for _, want := range []string{
 		"-e\x00HOME=/cache/home",

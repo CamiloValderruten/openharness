@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/llm"
 )
 
 func TestToolDefsTier1ExcludesWikiAndEmail(t *testing.T) {

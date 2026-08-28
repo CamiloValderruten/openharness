@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/tools"
+	"github.com/CamiloValderruten/openharness/internal/tools"
 )
 
 func TestToolBuffer_FillsAndPreservesOrder(t *testing.T) {

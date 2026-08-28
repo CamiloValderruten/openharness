@@ -24,7 +24,7 @@ type Config struct {
 	Limits   LimitsConfig   `toml:"limits"`
 	Update   UpdateConfig   `toml:"update"`
 
-	// MCP is optional; when Enabled, Faultline reads a dedicated MCP
+	// MCP is optional; when Enabled, OpenHarness reads a dedicated MCP
 	// server config file and exposes only explicitly allowlisted tools.
 	MCP MCPConfig `toml:"mcp"`
 
@@ -57,7 +57,7 @@ type Config struct {
 	Admin AdminConfig `toml:"admin"`
 
 	// Peers is optional; when Enabled, this process listens for
-	// pull-only peer messages from other Faultline instances and
+	// pull-only peer messages from other OpenHarness instances and
 	// can send to configured peers via peer_* tools. Messages are
 	// never auto-injected into the agent loop.
 	Peers PeersConfig `toml:"peers"`
@@ -198,7 +198,7 @@ type SandboxConfig struct {
 // DaemonsConfig holds long-lived Docker daemon settings. Requires
 // [sandbox] enabled. Ownership is a UUID stored in sandbox/.daemon-owner
 // (created on first enable) so daemon_list rediscovers containers after
-// Faultline or host restarts without a TOML agent name.
+// OpenHarness or host restarts without a TOML agent name.
 type DaemonsConfig struct {
 	Enabled bool `toml:"enabled"`
 	// Max is the maximum number of daemon containers this agent may
@@ -266,7 +266,7 @@ type UpdateConfig struct {
 	CheckInterval duration `toml:"check_interval"`
 
 	// GitHubRepo is the "owner/name" path of the repository whose
-	// releases we poll. Defaults to "CamiloValderruten/faultline".
+	// releases we poll. Defaults to "CamiloValderruten/openharness".
 	GitHubRepo string `toml:"github_repo"`
 
 	// RestartMode controls what the agent does after a successful
@@ -389,7 +389,7 @@ func (e EmbeddingsConfig) Active() bool {
 	return e.Enabled && e.URL != "" && e.Model != ""
 }
 
-// SkillsConfig holds Agent Skills settings. When Enabled, Faultline
+// SkillsConfig holds Agent Skills settings. When Enabled, OpenHarness
 // scans the Dir directory for skill folders (each containing a
 // SKILL.md), injects their name + description into the system prompt
 // at startup and on context rebuild, and advertises skill_activate,
@@ -560,7 +560,7 @@ func (a AdminConfig) Active() bool {
 }
 
 // PublishConfig holds settings for the HTML publishing harness HTTP
-// server. When Enabled, Faultline serves files from Root (default:
+// server. When Enabled, OpenHarness serves files from Root (default:
 // <sandbox.dir>/output/html) at /html/{path...} on Bind.
 //
 // Typical deployment: each agent (Arlo, Coco, …) enables publish on a
@@ -573,7 +573,7 @@ type PublishConfig struct {
 
 	// Bind is the loopback address:port to listen on. Default
 	// "127.0.0.1:8744". Give each agent its own port when multiple
-	// Faultline processes share a host.
+	// OpenHarness processes share a host.
 	Bind string `toml:"bind"`
 
 	// Root is the directory served at /html/. Empty means
@@ -651,7 +651,7 @@ type PeersConfig struct {
 	Agents []PeerAgentConfig `toml:"agents"`
 }
 
-// PeerAgentConfig describes one remote Faultline peer.
+// PeerAgentConfig describes one remote OpenHarness peer.
 type PeerAgentConfig struct {
 	Name  string `toml:"name"`
 	URL   string `toml:"url"`
@@ -721,14 +721,14 @@ func Default() *Config {
 		},
 		Sandbox: SandboxConfig{
 			Enabled: false,
-			// Faultline's own multi-runtime sandbox image (Debian-based;
+			// OpenHarness's own multi-runtime sandbox image (Debian-based;
 			// ships uv/uvx, python+pip, node+npm+npx, bun, deno, go,
 			// plus common LLM-friendly CLI tools including gh). Built from
 			// docker/sandbox/Dockerfile and published by the
 			// sandbox-image GH Actions workflow. Pin to a versioned
 			// tag in your config.toml if you want a specific image
 			// version locked down.
-			Image:       "ghcr.io/camilovalderruten/faultline-sandbox:latest",
+			Image:       "ghcr.io/camilovalderruten/openharness-sandbox:latest",
 			Dir:         "./sandbox",
 			Timeout:     duration(5 * time.Minute),
 			Network:     false,
@@ -750,7 +750,7 @@ func Default() *Config {
 		Update: UpdateConfig{
 			Enabled:       false,
 			CheckInterval: duration(1 * time.Hour),
-			GitHubRepo:    "CamiloValderruten/faultline",
+			GitHubRepo:    "CamiloValderruten/openharness",
 			RestartMode:   "exit",
 		},
 		MCP: MCPConfig{

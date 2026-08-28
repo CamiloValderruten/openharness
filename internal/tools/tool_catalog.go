@@ -8,9 +8,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/CamiloValderruten/faultline/internal/llm"
-	"github.com/CamiloValderruten/faultline/internal/search/bm25"
-	"github.com/CamiloValderruten/faultline/internal/search/vector"
+	"github.com/CamiloValderruten/openharness/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/search/bm25"
+	"github.com/CamiloValderruten/openharness/internal/search/vector"
 )
 
 // tier1Tools are always advertised in ToolDefs. Everything else is Tier 2:
@@ -110,7 +110,7 @@ func (te *Executor) searchAvailableToolsDef() llm.Tool {
 					},
 					"include_disallowed": map[string]interface{}{
 						"type":        "boolean",
-						"description": "Reserved; Faultline has no separate disallowed built-in set today. Defaults to false.",
+						"description": "Reserved; OpenHarness has no separate disallowed built-in set today. Defaults to false.",
 					},
 				},
 				"required": []string{"query"},

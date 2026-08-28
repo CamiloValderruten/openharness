@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{{.Title}} :: faultline</title>
+  <title>{{.Title}} :: openharness</title>
   <link rel="preload" href="/admin/static/fonts/vt323.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/admin/static/fonts/sharetechmono.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/admin/static/daisyui.css">
@@ -16,7 +16,7 @@
 <body class="bg-base-200 min-h-screen">
   {{if .Authenticated}}
     <div class="drawer lg:drawer-open">
-      <input id="faultline-drawer" type="checkbox" class="drawer-toggle">
+      <input id="openharness-drawer" type="checkbox" class="drawer-toggle">
 
       <div class="drawer-content flex flex-col min-h-screen">
         {{template "navbar" .}}
@@ -24,18 +24,18 @@
           {{template "content" .}}
         </main>
         <footer class="text-xs opacity-60 px-4 py-3 border-t border-base-300">
-          faultline {{.Version}} &middot; signed in as
+          openharness {{.Version}} &middot; signed in as
           <span class="font-mono">{{.Username}}</span> &middot;
           <span class="terminal-prompt">connection established</span>
         </footer>
       </div>
 
       <div class="drawer-side z-20">
-        <label for="faultline-drawer" aria-label="close sidebar"
+        <label for="openharness-drawer" aria-label="close sidebar"
                class="drawer-overlay"></label>
-        <aside class="faultline-sidebar w-64">
+        <aside class="openharness-sidebar w-64">
           <div class="px-4 mb-4">
-            <a href="/admin" class="faultline-brand">FAULTLINE</a>
+            <a href="/admin" class="openharness-brand">OPENHARNESS</a>
             <div class="text-xs opacity-60 mt-1">{{.Version}}</div>
           </div>
           <ul class="menu w-full px-0">
@@ -72,9 +72,9 @@
 {{end}}
 
 {{define "navbar"}}
-<div class="faultline-navbar navbar px-4 py-2">
+<div class="openharness-navbar navbar px-4 py-2">
   <div class="flex-none lg:hidden">
-    <label for="faultline-drawer" aria-label="open sidebar"
+    <label for="openharness-drawer" aria-label="open sidebar"
            class="btn btn-square btn-ghost">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
            stroke="currentColor" class="inline-block h-6 w-6 stroke-current">

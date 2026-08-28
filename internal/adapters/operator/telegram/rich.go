@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/CamiloValderruten/faultline/internal/messaging"
+	"github.com/CamiloValderruten/openharness/internal/messaging"
 )
 
 const (

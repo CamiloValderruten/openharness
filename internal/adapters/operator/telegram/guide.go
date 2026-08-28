@@ -1,6 +1,6 @@
 package telegram
 
-import "github.com/CamiloValderruten/faultline/internal/messaging"
+import "github.com/CamiloValderruten/openharness/internal/messaging"
 
 // ChannelGuide returns Telegram-specific collaborator instructions injected
 // into the system prompt on every context rebuild.

@@ -4,7 +4,7 @@
 // (see serialize.go) so we don't recompute embeddings on every
 // restart.
 //
-// At Faultline's scale (thousands of files, ~1536-dim vectors) flat
+// At OpenHarness's scale (thousands of files, ~1536-dim vectors) flat
 // scan is sub-millisecond per query and avoids the operational
 // complexity of HNSW/IVF approximate-nearest-neighbor structures.
 //

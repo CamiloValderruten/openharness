@@ -10,11 +10,11 @@ import (
 	"sync"
 	"time"
 
-	adminhttp "github.com/CamiloValderruten/faultline/internal/adapters/admin/http"
-	"github.com/CamiloValderruten/faultline/internal/adapters/auth/users"
-	"github.com/CamiloValderruten/faultline/internal/config"
-	flog "github.com/CamiloValderruten/faultline/internal/log"
-	"github.com/CamiloValderruten/faultline/internal/tools"
+	adminhttp "github.com/CamiloValderruten/openharness/internal/adapters/admin/http"
+	"github.com/CamiloValderruten/openharness/internal/adapters/auth/users"
+	"github.com/CamiloValderruten/openharness/internal/config"
+	flog "github.com/CamiloValderruten/openharness/internal/log"
+	"github.com/CamiloValderruten/openharness/internal/tools"
 )
 
 // adminServer bundles the admin-side state that needs to outlive the

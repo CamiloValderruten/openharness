@@ -2,7 +2,7 @@
 name: daemons
 description: >
   Run and manage long-lived Docker background daemons (daemon_spawn / list /
-  fetch / stop) that survive Faultline and host restarts. Use when work must
+  fetch / stop) that survive OpenHarness and host restarts. Use when work must
   keep running while you sleep or compact — monitors, long jobs, watchers.
   Activate for daemon, background process, long-running monitor, watchdog,
   persistent script, or alerts.jsonl wakeups.
@@ -11,7 +11,7 @@ description: >
 # Daemons
 
 Long-lived processes managed by the harness as **Docker containers**, not host
-shell jobs. They keep running across agent turns, Faultline restarts, and host
+shell jobs. They keep running across agent turns, OpenHarness restarts, and host
 reboots (`--restart unless-stopped`).
 
 Requires `[sandbox]` + `[daemons] enabled = true` in config. Ownership is an
@@ -49,13 +49,13 @@ Activate this skill (`skill_activate` name `daemons`) when you need the full con
 
 **Stdout** = logs only (`daemon_fetch`).
 
-**`/work/alerts.jsonl`** (also `$FAULTLINE_ALERTS`) = push notifications.
+**`/work/alerts.jsonl`** (also `$OPENHARNESS_ALERTS`) = push notifications.
 
 Append one JSON object per line with a `message` field:
 
 ```python
 import json, os
-ALERTS = os.environ["FAULTLINE_ALERTS"]  # /work/alerts.jsonl
+ALERTS = os.environ["OPENHARNESS_ALERTS"]  # /work/alerts.jsonl
 
 def notify(message, **meta):
     line = json.dumps({"message": message, **meta}) + "\n"
@@ -80,11 +80,11 @@ Inside the container you get the usual sandbox mounts plus:
 | `/work` (rw) | Per-daemon scratch + `alerts.jsonl` |
 | `/output`, `/input`, `/venv`, … | Same as sandbox_execute |
 
-Env always includes `FAULTLINE_ALERTS=/work/alerts.jsonl`. Network/memory follow `[sandbox]`.
+Env always includes `OPENHARNESS_ALERTS=/work/alerts.jsonl`. Network/memory follow `[sandbox]`.
 
 ## After restarts
 
-`daemon_list` queries Docker by `faultline.owner=<uuid>`. Descriptions live on
+`daemon_list` queries Docker by `openharness.owner=<uuid>`. Descriptions live on
 container labels, so you can rediscover what each daemon does even after
 compaction. Intentional `daemon_stop` removes the container so reboot will not
 bring it back.

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/CamiloValderruten/faultline/internal/skills"
+	"github.com/CamiloValderruten/openharness/internal/skills"
 )
 
 // ErrNotFound is returned by Get/Read when the requested skill does

@@ -8,9 +8,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/CamiloValderruten/faultline/internal/config"
-	"github.com/CamiloValderruten/faultline/internal/llm"
-	"github.com/CamiloValderruten/faultline/internal/search/bm25"
+	"github.com/CamiloValderruten/openharness/internal/config"
+	"github.com/CamiloValderruten/openharness/internal/llm"
+	"github.com/CamiloValderruten/openharness/internal/search/bm25"
 )
 
 func TestRunSuppliesToolDefsToPromptMigrations(t *testing.T) {

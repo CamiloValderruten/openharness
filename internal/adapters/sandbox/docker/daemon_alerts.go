@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CamiloValderruten/faultline/internal/daemon"
+	"github.com/CamiloValderruten/openharness/internal/daemon"
 )
 
 const (
 	alertsFileName  = "alerts.jsonl"
 	alertOffsetFile = ".alert-offset"
-	alertsEnvVar    = "FAULTLINE_ALERTS"
+	alertsEnvVar    = "OPENHARNESS_ALERTS"
 	alertsPathInCtr = "/work/alerts.jsonl"
 	alertPollEvery  = time.Second
 	maxAlertsPerMin = 4

@@ -191,10 +191,10 @@ func TestLoadConfig_OAuthOverride(t *testing.T) {
 	contents := `
 [oauth]
 bind = ":9000"
-public_base_url = "https://faultline.example.com"
+public_base_url = "https://openharness.example.com"
 callback_path = "/oauth/complete"
 state_ttl = "5m"
-credential_file = "/var/lib/faultline/oauth-tokens.json"
+credential_file = "/var/lib/openharness/oauth-tokens.json"
 `
 	if err := os.WriteFile(path, []byte(contents), 0644); err != nil {
 		t.Fatal(err)
@@ -205,8 +205,8 @@ credential_file = "/var/lib/faultline/oauth-tokens.json"
 		t.Fatalf("Load: %v", err)
 	}
 
-	if cfg.OAuth.PublicBaseURL != "https://faultline.example.com" {
-		t.Errorf("OAuth.PublicBaseURL = %q, want https://faultline.example.com", cfg.OAuth.PublicBaseURL)
+	if cfg.OAuth.PublicBaseURL != "https://openharness.example.com" {
+		t.Errorf("OAuth.PublicBaseURL = %q, want https://openharness.example.com", cfg.OAuth.PublicBaseURL)
 	}
 	if cfg.OAuth.Bind != ":9000" {
 		t.Errorf("OAuth.Bind = %q, want :9000", cfg.OAuth.Bind)
@@ -217,8 +217,8 @@ credential_file = "/var/lib/faultline/oauth-tokens.json"
 	if got, want := cfg.OAuth.StateTTL.Duration(), 5*time.Minute; got != want {
 		t.Errorf("OAuth.StateTTL = %v, want %v", got, want)
 	}
-	if cfg.OAuth.CredentialFile != "/var/lib/faultline/oauth-tokens.json" {
-		t.Errorf("OAuth.CredentialFile = %q, want /var/lib/faultline/oauth-tokens.json", cfg.OAuth.CredentialFile)
+	if cfg.OAuth.CredentialFile != "/var/lib/openharness/oauth-tokens.json" {
+		t.Errorf("OAuth.CredentialFile = %q, want /var/lib/openharness/oauth-tokens.json", cfg.OAuth.CredentialFile)
 	}
 }
 
