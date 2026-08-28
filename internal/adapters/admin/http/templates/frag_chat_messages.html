@@ -22,6 +22,13 @@
       <!-- Assistant Response Row (Flat, unboxed, natural reading) -->
       <div class="chat-assistant-row">
         
+        <!-- Pre-Execution Acknowledgment / Intent (if exists) -->
+        {{if .PreContent}}
+          <div class="chat-assistant-prose mb-3">
+            {{.PreContent}}
+          </div>
+        {{end}}
+
         <!-- Activity Drawer (Worked / Thought) -->
         {{if or .ThinkingRaw .IsThinking .ToolCalls}}
           <details class="chat-activity-group group" data-id="act-{{.ID}}" {{if .IsThinking}}open{{end}}>
@@ -99,8 +106,12 @@
           </details>
         {{end}}
 
-        <!-- Assistant Prose Message -->
-        {{if .Content}}
+        <!-- Post-Execution Response / Main Content -->
+        {{if .PostContent}}
+          <div class="chat-assistant-prose">
+            {{.PostContent}}
+          </div>
+        {{else if .Content}}
           <div class="chat-assistant-prose">
             {{.Content}}
           </div>

@@ -19,6 +19,8 @@ type ChatViewItem struct {
 	ThinkingRaw  string
 	ThinkingHTML template.HTML
 	IsThinking   bool
+	PreContent   template.HTML
+	PostContent  template.HTML
 	Content      template.HTML
 	RawText      string
 	Timestamp    string
@@ -233,9 +235,10 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 
 			thinkingRaw, isThinking, cleanContent := extractThinking(m.Content)
 
-			// If the model called send_message / send_rich_message / send_voice_message and didn't provide direct prose,
-			// extract the sent message text as the turn's response content so it's readable directly in the chat feed.
-			if cleanContent == "" && len(m.ToolCalls) > 0 {
+			var sentMessageText string
+			var toolItems []ChatToolCallItem
+
+			if len(m.ToolCalls) > 0 {
 				for _, tc := range m.ToolCalls {
 					if tc.Function.Name == "send_message" || tc.Function.Name == "send_rich_message" || tc.Function.Name == "send_voice_message" {
 						var sArgs struct {
@@ -245,23 +248,34 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 						}
 						if err := json.Unmarshal([]byte(tc.Function.Arguments), &sArgs); err == nil {
 							if sArgs.Text != "" {
-								cleanContent = sArgs.Text
-								break
+								sentMessageText = sArgs.Text
 							} else if sArgs.Content != "" {
-								cleanContent = sArgs.Content
-								break
+								sentMessageText = sArgs.Content
 							} else if sArgs.Transcript != "" {
-								cleanContent = sArgs.Transcript
-								break
+								sentMessageText = sArgs.Transcript
 							}
 						}
+					} else {
+						res := toolResults[tc.ID]
+						toolItems = append(toolItems, ChatToolCallItem{
+							ID:       tc.ID,
+							Name:     tc.Function.Name,
+							ArgsJSON: tc.Function.Arguments,
+							Result:   res,
+							Success:  !strings.HasPrefix(res, "Error:") && !strings.HasPrefix(res, "Failed:"),
+						})
 					}
 				}
 			}
 
-			var formattedContent template.HTML
-			if cleanContent != "" {
-				formattedContent = template.HTML(formatChatMarkdown(cleanContent))
+			var formattedPre, formattedPost, formattedMain template.HTML
+			if cleanContent != "" && sentMessageText != "" {
+				formattedPre = template.HTML(formatChatMarkdown(cleanContent))
+				formattedPost = template.HTML(formatChatMarkdown(sentMessageText))
+			} else if cleanContent != "" {
+				formattedMain = template.HTML(formatChatMarkdown(cleanContent))
+			} else if sentMessageText != "" {
+				formattedMain = template.HTML(formatChatMarkdown(sentMessageText))
 			}
 
 			var formattedThinking template.HTML
@@ -275,26 +289,16 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 				ThinkingRaw:  thinkingRaw,
 				ThinkingHTML: formattedThinking,
 				IsThinking:   isThinking,
+				PreContent:   formattedPre,
+				PostContent:  formattedPost,
+				Content:      formattedMain,
 				RawText:      cleanContent,
-				Content:      formattedContent,
 				Timestamp:    time.Now().Format("15:04"),
-			}
-
-			if len(m.ToolCalls) > 0 {
-				for _, tc := range m.ToolCalls {
-					res := toolResults[tc.ID]
-					item.ToolCalls = append(item.ToolCalls, ChatToolCallItem{
-						ID:       tc.ID,
-						Name:     tc.Function.Name,
-						ArgsJSON: tc.Function.Arguments,
-						Result:   res,
-						Success:  !strings.HasPrefix(res, "Error:") && !strings.HasPrefix(res, "Failed:"),
-					})
-				}
+				ToolCalls:    toolItems,
 			}
 
 			// Only append if there's content, thinking, or tool calls
-			if cleanContent != "" || thinkingRaw != "" || isThinking || len(item.ToolCalls) > 0 {
+			if cleanContent != "" || sentMessageText != "" || thinkingRaw != "" || isThinking || len(item.ToolCalls) > 0 {
 				items = append(items, item)
 			}
 		}
