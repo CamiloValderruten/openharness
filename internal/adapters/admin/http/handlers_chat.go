@@ -233,6 +233,32 @@ func (s *Server) getChatItems() ([]ChatViewItem, bool) {
 
 			thinkingRaw, isThinking, cleanContent := extractThinking(m.Content)
 
+			// If the model called send_message / send_rich_message / send_voice_message and didn't provide direct prose,
+			// extract the sent message text as the turn's response content so it's readable directly in the chat feed.
+			if cleanContent == "" && len(m.ToolCalls) > 0 {
+				for _, tc := range m.ToolCalls {
+					if tc.Function.Name == "send_message" || tc.Function.Name == "send_rich_message" || tc.Function.Name == "send_voice_message" {
+						var sArgs struct {
+							Text       string `json:"text"`
+							Content    string `json:"content"`
+							Transcript string `json:"transcript"`
+						}
+						if err := json.Unmarshal([]byte(tc.Function.Arguments), &sArgs); err == nil {
+							if sArgs.Text != "" {
+								cleanContent = sArgs.Text
+								break
+							} else if sArgs.Content != "" {
+								cleanContent = sArgs.Content
+								break
+							} else if sArgs.Transcript != "" {
+								cleanContent = sArgs.Transcript
+								break
+							}
+						}
+					}
+				}
+			}
+
 			var formattedContent template.HTML
 			if cleanContent != "" {
 				formattedContent = template.HTML(formatChatMarkdown(cleanContent))
