@@ -323,15 +323,13 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Thinking block inside activity */
 .chat-thinking-block {
-  background: rgba(14, 19, 30, 0.8);
+  background: rgba(14, 19, 30, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
   font-size: 0.84rem;
   color: var(--text-secondary);
   line-height: 1.6;
-  max-height: 350px;
-  overflow-y: auto;
 }
 
 .prose-thinking p {

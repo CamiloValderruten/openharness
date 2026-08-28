@@ -47,6 +47,7 @@
 <script>
   let openDetailsIds = new Set();
   let wasNearBottom = true;
+  let savedScrollTop = 0;
 
   function handleChatSubmit(e) {
     const input = document.getElementById('chat-input');
@@ -76,12 +77,13 @@
     }
   });
 
-  // Track scroll position and expanded accordions before HTMX swaps content
+  // Track exact scroll position and expanded accordions before HTMX swaps content
   document.body.addEventListener('htmx:beforeSwap', function(evt) {
     if (evt.detail.target && evt.detail.target.id === 'chat-messages-container') {
       const container = evt.detail.target;
-      const threshold = 120; // px tolerance from bottom
+      const threshold = 100; // px tolerance from bottom
       wasNearBottom = (container.scrollHeight - container.scrollTop - container.clientHeight) <= threshold;
+      savedScrollTop = container.scrollTop;
 
       openDetailsIds.clear();
       container.querySelectorAll('details[data-id]').forEach(el => {
@@ -92,7 +94,7 @@
     }
   });
 
-  // Restore expanded accordions and conditionally stick to bottom after swap
+  // Restore expanded accordions and exact scroll position after swap
   document.body.addEventListener('htmx:afterSwap', function(evt) {
     if (evt.detail.target && evt.detail.target.id === 'chat-messages-container') {
       const container = evt.detail.target;
@@ -105,9 +107,12 @@
         }
       });
 
-      // Only scroll to bottom if user was ALREADY at or near bottom
+      // If user was following along at the bottom, stick to bottom.
+      // If user was scrolled up reading a thought or earlier message, keep exact scroll!
       if (wasNearBottom) {
         container.scrollTop = container.scrollHeight;
+      } else {
+        container.scrollTop = savedScrollTop;
       }
     }
   });
